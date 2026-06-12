@@ -20,15 +20,18 @@ async function callClaude(
   const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
 
   if (!apiKey) {
+    console.warn('[CapitalScope] No VITE_ANTHROPIC_API_KEY — showing demo data. Add key to .env.local for live AI.');
     const mock = getMockResponse(systemPrompt, userMessage);
+    const demoPrefix = '⚠️ **DEMO MODE** — Set `VITE_ANTHROPIC_API_KEY` in `.env.local` for live AI analysis.\n\n---\n\n';
+    const mockWithPrefix = demoPrefix + mock;
     if (onChunk) {
-      const words = mock.split(' ');
+      const words = mockWithPrefix.split(' ');
       for (const word of words) {
         onChunk(word + ' ');
         await new Promise(r => setTimeout(r, 18));
       }
     }
-    return mock;
+    return mockWithPrefix;
   }
 
   try {

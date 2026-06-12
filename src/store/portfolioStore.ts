@@ -14,6 +14,8 @@ interface PortfolioState {
   addToWatchlist: (symbol: string) => void;
   removeFromWatchlist: (symbol: string) => void;
   clearPortfolio: () => void;
+  activeMarketId: string;
+  setActiveMarket: (id: string) => void;
 }
 
 const DEFAULT_HOLDINGS: PortfolioHolding[] = [];
@@ -23,6 +25,7 @@ export const usePortfolioStore = create<PortfolioState>()(
     (set, get) => ({
       holdings: DEFAULT_HOLDINGS,
       watchlist: DEFAULT_WATCHLIST,
+      activeMarketId: 'US',
 
       addHolding: (holding) => {
         const h = get().holdings;
@@ -91,6 +94,8 @@ export const usePortfolioStore = create<PortfolioState>()(
       },
 
       clearPortfolio: () => set({ holdings: [] }),
+
+      setActiveMarket: (id) => set({ activeMarketId: id }),
     }),
     { name: 'capitalscope-portfolio' }
   )

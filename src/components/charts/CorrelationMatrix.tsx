@@ -1,10 +1,25 @@
 import { useEffect, useState } from 'react';
-import { calcCorrelation, getDailyReturns } from '../../utils/finance';
-import { getStockHistory } from '../../utils/api';
 
 interface CorrelationMatrixProps {
   symbols: string[];
-  prices?: Record<string, number>;
+  prices?: Record<string, number[]>;
+}
+
+function pearson(a: number[], b: number[]): number {
+  const n = Math.min(a.length, b.length);
+  if (n < 10) return 0;
+  const ra = a.slice(-n).map((v, i) => i > 0 ? (v - a[a.length - n + i - 1]) / a[a.length - n + i - 1] : 0).slice(1);
+  const rb = b.slice(-n).map((v, i) => i > 0 ? (v - b[b.length - n + i - 1]) / b[b.length - n + i - 1] : 0).slice(1);
+  const ma = ra.reduce((s, v) => s + v, 0) / ra.length;
+  const mb = rb.reduce((s, v) => s + v, 0) / rb.length;
+  let num = 0, da = 0, db = 0;
+  for (let i = 0; i < ra.length; i++) {
+    num += (ra[i] - ma) * (rb[i] - mb);
+    da += (ra[i] - ma) ** 2;
+    db += (rb[i] - mb) ** 2;
+  }
+  const denom = Math.sqrt(da * db);
+  return denom === 0 ? 0 : Math.max(-1, Math.min(1, num / denom));
 }
 
 function getCorrelationColor(value: number): string {
@@ -37,20 +52,20 @@ export default function CorrelationMatrix({ symbols, prices }: CorrelationMatrix
     if (symbols.length < 2) { setLoading(false); return; }
     setLoading(true);
 
-    Promise.all(symbols.map(sym =>
-      getStockHistory(sym, '1Y', prices?.[sym]).then(h => h.map(p => p.close))
-    )).then(allPrices => {
-      const returns = allPrices.map(getDailyReturns);
-      const n = symbols.length;
-      const m: number[][] = Array.from({ length: n }, () => Array(n).fill(0));
-      for (let i = 0; i < n; i++) {
-        for (let j = 0; j < n; j++) {
-          m[i][j] = i === j ? 1 : +calcCorrelation(returns[i], returns[j]).toFixed(3);
-        }
+    const n = symbols.length;
+    const m: number[][] = Array.from({ length: n }, () => Array(n).fill(0));
+    for (let i = 0; i < n; i++) {
+      for (let j = 0; j < n; j++) {
+        if (i === j) { m[i][j] = 1; continue; }
+        const a = prices?.[symbols[i]];
+        const b = prices?.[symbols[j]];
+        m[i][j] = a && b && a.length >= 10 && b.length >= 10
+          ? +pearson(a, b).toFixed(3)
+          : 0;
       }
-      setMatrix(m);
-      setLoading(false);
-    });
+    }
+    setMatrix(m);
+    setLoading(false);
   }, [symbols.join(',')]);
 
   if (loading) return <div className="shimmer h-64 rounded-xl" />;

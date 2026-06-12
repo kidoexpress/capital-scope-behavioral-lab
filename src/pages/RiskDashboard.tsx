@@ -1,4 +1,5 @@
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { fetchPriceHistory } from '../utils/priceHistory';
 import { useNavigate } from 'react-router-dom';
 import { Activity, ArrowRight, BarChart2, CircleHelp, Gauge, Layers3, Shield, TrendingDown } from 'lucide-react';
 import CorrelationMatrix from '../components/charts/CorrelationMatrix';
@@ -100,7 +101,12 @@ export default function RiskDashboard() {
     : 0;
   const tone = riskTone(riskScore);
   const symbols = holdings.map(h => h.symbol);
-  const prices = Object.fromEntries(holdings.map(h => [h.symbol, h.currentPrice]));
+  // Real price history for correlation calculation
+  const [priceHistory, setPriceHistory] = useState<Record<string, number[]>>({});
+  useEffect(() => {
+    if (symbols.length < 2) { setPriceHistory({}); return; }
+    fetchPriceHistory(symbols).then(setPriceHistory);
+  }, [symbols.join(',')]);
   const oneDayVaR95 = hasHoldings ? calcVaR(totalValue, estVol, 1.645) : 0;
 
   return (
@@ -173,7 +179,7 @@ export default function RiskDashboard() {
             </div>
             {hasCorrelationData ? (
               <div className="risk-correlation-wrap">
-                <CorrelationMatrix symbols={symbols} prices={prices} />
+                <CorrelationMatrix symbols={symbols} prices={priceHistory} />
               </div>
             ) : (
               <div className="risk-placeholder-card">
