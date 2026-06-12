@@ -3,6 +3,19 @@ import { persist } from 'zustand/middleware';
 import type { PortfolioHolding } from '../types';
 import { DEFAULT_WATCHLIST } from '../data/mockStocks';
 
+export interface TradeEntry {
+  id: string;
+  date: string;
+  ticker: string;
+  action: 'BUY' | 'SELL' | 'WATCH';
+  price: number;
+  shares: number;
+  thesis: string;
+  outcome: 'WIN' | 'LOSS' | 'OPEN' | 'NEUTRAL';
+  lessons: string;
+  pnl: number | null;
+}
+
 interface PortfolioState {
   holdings: PortfolioHolding[];
   watchlist: string[];
@@ -16,6 +29,9 @@ interface PortfolioState {
   clearPortfolio: () => void;
   activeMarketId: string;
   setActiveMarket: (id: string) => void;
+  tradeJournal: TradeEntry[];
+  addTradeEntry: (entry: TradeEntry) => void;
+  removeTradeEntry: (id: string) => void;
 }
 
 const DEFAULT_HOLDINGS: PortfolioHolding[] = [];
@@ -26,6 +42,7 @@ export const usePortfolioStore = create<PortfolioState>()(
       holdings: DEFAULT_HOLDINGS,
       watchlist: DEFAULT_WATCHLIST,
       activeMarketId: 'US',
+      tradeJournal: [],
 
       addHolding: (holding) => {
         const h = get().holdings;
@@ -96,6 +113,10 @@ export const usePortfolioStore = create<PortfolioState>()(
       clearPortfolio: () => set({ holdings: [] }),
 
       setActiveMarket: (id) => set({ activeMarketId: id }),
+
+      addTradeEntry: (entry) => set(s => ({ tradeJournal: [entry, ...s.tradeJournal] })),
+
+      removeTradeEntry: (id) => set(s => ({ tradeJournal: s.tradeJournal.filter(e => e.id !== id) })),
     }),
     { name: 'capitalscope-portfolio' }
   )

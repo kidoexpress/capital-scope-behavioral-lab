@@ -7,7 +7,7 @@ import {
   FlaskConical, Zap, Star,
   FileText, BarChart2, Calculator,
   TerminalSquare,
-  BookOpen, ScanSearch, Home, WalletCards,
+  BookOpen, ScanSearch, Home, WalletCards, NotebookPen,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -25,6 +25,7 @@ const CORE_NAV: NavItem[] = [
   { path: '/scenarios',  icon: Zap,          label: 'Scenarios'  },
   { path: '/watchlist',  icon: Star,         label: 'Watchlist'  },
   { path: '/paper-trading', icon: WalletCards, label: 'Paper Trade' },
+  { path: '/journal',    icon: NotebookPen,  label: 'Journal'    },
 ];
 
 const AI_NAV: NavItem[] = [

@@ -14,6 +14,7 @@ import TerminalPage from './pages/Terminal';
 import StockResearch from './pages/StockResearch';
 import GoldMiningScanner from './pages/GoldMiningScanner';
 import PaperTrading from './pages/PaperTrading';
+import TradeJournal from './pages/TradeJournal';
 
 export default function App() {
   return (
@@ -32,6 +33,7 @@ export default function App() {
           <Route path="scenarios"  element={<ScenarioSimulator />} />
           <Route path="watchlist"  element={<Watchlist />} />
           <Route path="paper-trading" element={<PaperTrading />} />
+          <Route path="journal"    element={<TradeJournal />} />
           {/* AI Agents */}
           <Route path="agents/earnings" element={<EarningsReviewer />} />
           <Route path="agents/research" element={<MarketResearchAgent />} />

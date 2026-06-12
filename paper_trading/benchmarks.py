@@ -10,6 +10,11 @@ BENCHMARK_TICKERS = {
     "QQQ": "QQQ",
     "BRK-B": "BRK-B",
     "ARKK": "ARKK",
+    "BOVA11.SA": "BOVA11.SA",   # Brazil
+    "ISF.L":     "ISF.L",       # UK
+    "EXS1.DE":   "EXS1.DE",     # Germany
+    "1306.T":    "1306.T",      # Japan
+    "2800.HK":   "2800.HK",     # Hong Kong
 }
 
 

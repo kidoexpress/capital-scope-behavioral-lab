@@ -19,6 +19,7 @@ import { getStockQuote } from '../utils/api';
 import { DATA_SOURCE_LABEL, getSparkline } from '../services/marketDataService';
 import { formatCurrency, formatMarketCap, formatPercent, formatVolume } from '../utils/finance';
 import StockSearch from '../components/ui/StockSearch';
+import NewsFeed from '../components/widgets/NewsFeed';
 import Sparkline from '../components/charts/Sparkline';
 import type { StockQuote } from '../types';
 
@@ -326,6 +327,10 @@ export default function Watchlist() {
             <p>Use breadth to separate isolated stock moves from broad risk appetite.</p>
           </div>
         </div>
+      </section>
+
+      <section style={{ marginTop: 16 }}>
+        <NewsFeed symbols={watchlist} />
       </section>
     </div>
   );

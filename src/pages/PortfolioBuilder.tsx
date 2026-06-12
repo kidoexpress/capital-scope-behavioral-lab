@@ -7,6 +7,8 @@ import { calcDiversificationScore, formatCurrency, formatPercent } from '../util
 import AllocationChart from '../components/charts/AllocationChart';
 import Disclaimer from '../components/ui/Disclaimer';
 import StockSearch from '../components/ui/StockSearch';
+import EarningsCalendar from '../components/widgets/EarningsCalendar';
+import RebalancingAdvisor from '../components/widgets/RebalancingAdvisor';
 import { SECTOR_COLORS } from '../data/mockStocks';
 import { DATA_SOURCE_LABEL } from '../services/marketDataService';
 import type { PortfolioHolding } from '../types';
@@ -326,6 +328,15 @@ export default function PortfolioBuilder() {
             </ResponsiveContainer>
           </div>
           {holdings.length > 0 && <PortfolioReviewCard holdings={holdings} diversScore={diversScore} />}
+          {holdings.length > 0 && (
+            <EarningsCalendar symbols={holdings.map(h => h.symbol)} />
+          )}
+          {holdings.length > 0 && totalValue > 0 && (
+            <RebalancingAdvisor
+              holdings={holdings.map(h => ({ symbol: h.symbol, currentWeight: h.weight * 100, currentValue: h.value }))}
+              totalValue={totalValue}
+            />
+          )}
           <Disclaimer />
         </div>
       </section>
