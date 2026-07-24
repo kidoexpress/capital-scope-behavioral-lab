@@ -12,12 +12,24 @@ dist
 dist-ssr
 *.local
 
+# Secrets / environment (never commit real credentials — only .env.example is tracked)
+.env
+.env.*
+!.env.example
+
 # Local paper trading runtime state/cache
 paper_trading/.cache/
 paper_trading/__pycache__/
 paper_trading/portfolios_state.json
 paper_trading/paper_trading.db
 paper_trading/paper_trading.db-*
+
+# Behavioral Lab runtime state / experiment outputs
+src/behavioral-lab/**/*.local.*
+behavioral_lab_data/
+experiments_output/
+*.experiment.json
+*.replay.json
 
 # Editor directories and files
 .vscode/*

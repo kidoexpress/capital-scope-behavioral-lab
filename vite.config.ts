@@ -11,12 +11,14 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5173,
+    // Behavioral Lab runs on isolated ports so it can run alongside the
+    // upstream Capital Scope Terminal (5173 / 8000) without collision.
+    port: 5273,
     proxy: {
       '/api/yahoo': {
         // Route through FastAPI backend proxy for consistency between dev and production.
         // Same code path works in both environments.
-        target: 'http://127.0.0.1:8000',
+        target: 'http://127.0.0.1:8100',
         changeOrigin: true,
       },
       '/api/claude': {
@@ -39,7 +41,7 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api\/finnhub/, ''),
       },
       '/api/portfolio': {
-        target: 'http://127.0.0.1:8000',
+        target: 'http://127.0.0.1:8100',
         changeOrigin: true,
       },
     },

@@ -97,7 +97,7 @@ export const usePortfolioStore = create<PortfolioState>()(
 
       setActiveMarket: (id) => set({ activeMarketId: id }),
     }),
-    { name: 'capitalscope-portfolio' }
+    { name: 'capital-scope-behavioral-lab-portfolio' }
   )
 );
 
