@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from paper_trading import router as paper_trading_router
 from paper_trading.proxy import proxy_router
+from synthetic_portfolio_lab.api_routes import router as synthetic_portfolio_router
 
 app = FastAPI(
     title="Capital Scope Behavioral Lab API",
@@ -33,6 +34,7 @@ app.add_middleware(
 # ── Routers ───────────────────────────────────────────────────────────────────
 app.include_router(paper_trading_router, prefix="/api")
 app.include_router(proxy_router, prefix="/api")
+app.include_router(synthetic_portfolio_router, prefix="/api")
 
 
 @app.get("/health")
