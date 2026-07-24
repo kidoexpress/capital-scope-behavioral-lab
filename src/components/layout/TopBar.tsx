@@ -1,7 +1,8 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Bell, Search, Command } from 'lucide-react';
+import { Bell, Search, Command, Loader2 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
-import { STOCK_DATABASE } from '../../data/mockStocks';
+import { searchYahooSymbols, type SymbolSearchResult } from '../../services/marketDataService';
+import { displayTicker, getMarketFromTicker } from '../../config/markets';
 
 const PAGE_META: Record<string, { title: string; crumb: string }> = {
   '/':                  { title: 'CapitalScope',    crumb: 'Home'        },
@@ -19,25 +20,34 @@ const PAGE_META: Record<string, { title: string; crumb: string }> = {
   '/terminal':          { title: 'Terminal',         crumb: 'Command Mode'},
 };
 
-const ALL_TICKERS = Object.keys(STOCK_DATABASE);
-
 export default function TopBar() {
   const location = useLocation();
   const navigate = useNavigate();
   const meta = PAGE_META[location.pathname] ?? { title: 'CapitalScope', crumb: '' };
 
   const [query, setQuery] = useState('');
+  const [results, setResults] = useState<SymbolSearchResult[]>([]);
+  const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const reqId = useRef(0);
 
-  const results = query.trim().length >= 1
-    ? ALL_TICKERS.filter(t =>
-        t.includes(query.toUpperCase()) ||
-        (STOCK_DATABASE[t]?.name ?? '').toLowerCase().includes(query.toLowerCase())
-      ).slice(0, 6)
-    : [];
+  // Debounced GLOBAL live search — every exchange Yahoo indexes, plus brand aliases.
+  useEffect(() => {
+    const value = query.trim();
+    if (!value) { setResults([]); setLoading(false); return; }
+    setLoading(true);
+    const id = ++reqId.current;
+    const timer = window.setTimeout(async () => {
+      const hits = await searchYahooSymbols(value); // undefined suffix = global
+      if (id !== reqId.current) return;
+      setResults(hits.slice(0, 8));
+      setLoading(false);
+    }, 250);
+    return () => window.clearTimeout(timer);
+  }, [query]);
 
   // Close on outside click
   useEffect(() => {
@@ -66,8 +76,9 @@ export default function TopBar() {
   }, []);
 
   const handleSelect = (ticker: string) => {
-    navigate(`/analyzer?ticker=${ticker}`);
+    navigate(`/analyzer?ticker=${encodeURIComponent(ticker)}`);
     setQuery('');
+    setResults([]);
     setOpen(false);
     setFocused(false);
   };
@@ -96,34 +107,39 @@ export default function TopBar() {
             placeholder="Search ticker or company…"
             className="flex-1 bg-transparent text-xs outline-none"
           />
-          <div className="topbar-kbd">
-            <Command size={9} />
-            <span className="font-mono text-[9px]">K</span>
-          </div>
+          {loading
+            ? <Loader2 size={12} className="animate-spin" style={{ color: 'var(--text-lo)' }} />
+            : (
+              <div className="topbar-kbd">
+                <Command size={9} />
+                <span className="font-mono text-[9px]">K</span>
+              </div>
+            )}
         </div>
 
         {/* Dropdown results */}
         {open && results.length > 0 && (
           <div className="topbar-results">
-            {results.map(ticker => {
-              const stock = STOCK_DATABASE[ticker];
+            {results.map(r => {
+              const mkt = getMarketFromTicker(r.symbol);
               return (
                 <button
-                  key={ticker}
-                  onClick={() => handleSelect(ticker)}
+                  key={r.symbol}
+                  onClick={() => handleSelect(r.symbol)}
                   className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors"
                   style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
                   onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.04)')}
                   onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                 >
-                  <span className="font-mono text-xs font-bold w-12 shrink-0" style={{ color: 'var(--accent)' }}>
-                    {ticker}
+                  <span className="font-mono text-xs font-bold shrink-0" style={{ color: 'var(--accent)', minWidth: 64 }}>
+                    {displayTicker(r.symbol)}
                   </span>
                   <span className="text-xs truncate" style={{ color: 'var(--text-mid)' }}>
-                    {stock?.name ?? ticker}
+                    {r.name}
                   </span>
-                  <span className="ml-auto text-[10px]" style={{ color: 'var(--text-lo)' }}>
-                    {stock?.sector ?? ''}
+                  <span className="ml-auto text-[10px] shrink-0 flex items-center gap-1" style={{ color: 'var(--text-lo)' }}>
+                    <span>{mkt.flag}</span>
+                    <span>{r.sector}</span>
                   </span>
                 </button>
               );

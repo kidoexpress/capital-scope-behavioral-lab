@@ -1,13 +1,20 @@
 import type { PricePoint, StockQuote, TimeRange } from '../types';
 import {
+  getFundamentals,
   getHistoricalPrices,
   getQuote,
   getQuotes,
   searchMarketSymbols,
 } from '../services/marketDataService';
 
-/** Get stock quote from the unified Yahoo Finance market data layer. */
+/**
+ * Get a single stock quote, enriched with the fundamentals (market cap, P/E, EPS)
+ * that the price feed alone cannot provide. Used by detail views; list views should
+ * call getMultipleQuotes, which stays on the faster price-only path.
+ */
 export async function getStockQuote(symbol: string): Promise<StockQuote | null> {
+  const enriched = await getFundamentals(symbol);
+  if (enriched) return enriched as StockQuote;
   return getQuote(symbol);
 }
 

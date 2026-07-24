@@ -5,6 +5,7 @@ import {
 } from 'recharts';
 import type { TimeRange } from '../../types';
 import { getStockHistory } from '../../utils/api';
+import { getCurrencySymbol } from '../../config/markets';
 
 const TIME_RANGES: TimeRange[] = ['1D', '5D', '1M', '3M', '6M', '1Y', '3Y', '5Y'];
 
@@ -15,7 +16,7 @@ interface PriceChartProps {
   height?: number;
 }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label, ccy = '$' }: any) => {
   if (!active || !payload?.length) return null;
   return (
     <div className="cs-tooltip">
@@ -25,7 +26,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
           {p.name}: {typeof p.value === 'number'
             ? p.name?.includes('%') || p.dataKey === 'change' || p.dataKey === 'compareChange'
               ? `${p.value >= 0 ? '+' : ''}${p.value.toFixed(2)}%`
-              : `$${p.value.toFixed(2)}`
+              : `${ccy}${p.value.toFixed(2)}`
             : p.value}
         </p>
       ))}
@@ -74,6 +75,7 @@ export default function PriceChart({ symbol, currentPrice, compareSymbol, height
   const dataKey   = showCompare ? 'change' : 'price';
   const lineColor = isPositive ? 'var(--green)' : 'var(--red)';
   const gradId    = `grad-${symbol}-${isPositive ? 'g' : 'r'}`;
+  const ccy       = getCurrencySymbol(symbol);
 
   return (
     <div className="flex flex-col gap-4">
@@ -141,12 +143,12 @@ export default function PriceChart({ symbol, currentPrice, compareSymbol, height
             tickFormatter={v =>
               showCompare
                 ? `${v >= 0 ? '+' : ''}${v.toFixed(1)}%`
-                : `$${v >= 1000 ? `${(v / 1000).toFixed(1)}k` : v.toFixed(0)}`
+                : `${ccy}${v >= 1000 ? `${(v / 1000).toFixed(1)}k` : v.toFixed(0)}`
             }
             domain={['auto', 'auto']}
           />
 
-          <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.12)', strokeWidth: 1 }} />
+          <Tooltip content={(props: any) => <CustomTooltip {...props} ccy={showCompare ? '' : ccy} />} cursor={{ stroke: 'rgba(255,255,255,0.12)', strokeWidth: 1 }} />
 
           {showCompare && (
             <ReferenceLine y={0} stroke="rgba(255,255,255,0.08)" strokeDasharray="4 4" />

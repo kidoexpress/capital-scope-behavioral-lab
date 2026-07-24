@@ -12,16 +12,34 @@ from .data_feed import get_latest_prices
 DATA_SOURCE = "Yahoo Finance"
 
 
+# Exchange suffixes yfinance expects to keep as ".XX" (dot preserved). Anything
+# else after a dot is a US class-share separator that Yahoo writes with a dash
+# (BRK.B -> BRK-B, BF.B -> BF-B).
+_MARKET_SUFFIXES = {
+    "SA", "L", "DE", "PA", "T", "HK", "MI", "AS", "SW", "TO", "V", "AX",
+    "NS", "BO", "KS", "KQ", "TW", "SI", "BK", "JK", "MX", "SR", "IS",
+    "MC", "VI", "BR", "LS", "HE", "ST", "OL", "CO", "F", "MU", "DU",
+    "SG", "BE", "HM", "VX", "PR", "WA", "AT", "TA", "NZ", "JO",
+}
+
+
 def normalize_ticker(ticker: str) -> str:
     cleaned = ticker.upper().strip()
     if not cleaned:
         raise ValueError("Ticker is required.")
-    return cleaned.replace(".", "-")
+    if "." in cleaned:
+        base, _, suffix = cleaned.rpartition(".")
+        # Preserve real exchange suffixes (VIVT3.SA, 7974.T); only collapse the
+        # US class-share dot (BRK.B -> BRK-B).
+        if suffix in _MARKET_SUFFIXES:
+            return cleaned
+        return cleaned.replace(".", "-")
+    return cleaned
 
 
 def yfinance_symbol(ticker: str) -> str:
-    normalized = normalize_ticker(ticker)
-    return normalized.replace("-", ".") if normalized == "BRK-B" else normalized
+    # normalize_ticker already yields the exact symbol yfinance expects.
+    return normalize_ticker(ticker)
 
 
 def get_latest_quote(ticker: str) -> dict[str, Any]:
@@ -78,15 +96,24 @@ def get_fundamentals(ticker: str) -> dict[str, Any]:
     revenue_growth = info.get("revenueGrowth")
     gross_margin = info.get("grossMargins")
     ev_ebitda = info.get("enterpriseToEbitda")
+    dividend_yield = info.get("dividendYield")
     return {
         "ticker": symbol,
         "name": info.get("longName") or info.get("shortName") or symbol,
         "sector": info.get("sector", "N/A"),
+        "industry": info.get("industry") or "",
         "psTTM": round(market_cap / revenue, 2) if revenue > 0 else None,
         "evEbitda": round(ev_ebitda, 1) if ev_ebitda else None,
         "grossMargin": round(gross_margin * 100, 1) if gross_margin else None,
         "yoyGrowth": round(revenue_growth * 100, 1) if revenue_growth else None,
         "marketCap": market_cap,
+        # Yahoo's v7/finance/quote endpoint is crumb-gated, so the browser cannot
+        # read these directly. yfinance performs that handshake for us server-side.
+        "peRatio": info.get("trailingPE") or info.get("forwardPE"),
+        "eps": info.get("trailingEps"),
+        "beta": info.get("beta"),
+        "avgVolume": info.get("averageVolume"),
+        "dividendYield": round(dividend_yield, 2) if dividend_yield else None,
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "source": DATA_SOURCE,
         "status": "delayed",

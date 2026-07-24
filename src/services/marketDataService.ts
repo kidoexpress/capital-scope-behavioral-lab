@@ -1,5 +1,6 @@
 import type { PricePoint, StockQuote, TimeRange } from '../types';
 import { STOCK_DATABASE } from '../data/mockStocks';
+import { lookupAliases } from '../config/tickerAliases';
 
 type CacheEntry<T> = { data: T; ts: number };
 
@@ -179,22 +180,26 @@ export async function getQuote(ticker: string, options: { forceRefresh?: boolean
   const cached = quoteCache.get(symbol);
   if (!options.forceRefresh && isFresh(cached, QUOTE_TTL)) return cached!.data;
 
+  // Primary path: the v8 chart endpoint. It needs no auth crumb, unlike
+  // v7/finance/quote which Yahoo now answers with 401 for anonymous callers.
   try {
-    const yahoo = yahooSymbol(symbol);
-    const json = await fetchJson(`/api/yahoo/v7/finance/quote?symbols=${encodeURIComponent(yahoo)}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent,regularMarketVolume,marketCap,trailingPE,forwardPE,fiftyTwoWeekHigh,fiftyTwoWeekLow,averageDailyVolume3Month,averageVolume,beta,shortName,longName,sector,industry,regularMarketPreviousClose,regularMarketOpen,regularMarketDayHigh,regularMarketDayLow,epsTrailingTwelveMonths,dividendYield`);
-    const raw = json?.quoteResponse?.result?.[0];
-    const quote = mapYahooQuote(raw, symbol);
-    if (!quote) throw new Error(`No quote returned for ${symbol}`);
+    const quote = await getQuoteFromChart(symbol);
+    if (!quote) throw new Error(`No chart quote returned for ${symbol}`);
     quoteCache.set(symbol, { data: quote, ts: Date.now() });
     return quote;
-  } catch (error) {
+  } catch (chartError) {
+    // Secondary path: v7 quote. Only succeeds when the proxy managed to attach
+    // a valid crumb, but it carries richer fields (marketCap, P/E, EPS) when it does.
     try {
-      const quote = await getQuoteFromChart(symbol);
-      if (!quote) throw new Error(`No chart quote returned for ${symbol}`);
+      const yahoo = yahooSymbol(symbol);
+      const json = await fetchJson(`/api/yahoo/v7/finance/quote?symbols=${encodeURIComponent(yahoo)}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent,regularMarketVolume,marketCap,trailingPE,forwardPE,fiftyTwoWeekHigh,fiftyTwoWeekLow,averageDailyVolume3Month,averageVolume,beta,shortName,longName,sector,industry,regularMarketPreviousClose,regularMarketOpen,regularMarketDayHigh,regularMarketDayLow,epsTrailingTwelveMonths,dividendYield`);
+      const raw = json?.quoteResponse?.result?.[0];
+      const quote = mapYahooQuote(raw, symbol);
+      if (!quote) throw new Error(`No quote returned for ${symbol}`);
       quoteCache.set(symbol, { data: quote, ts: Date.now() });
       return quote;
-    } catch (chartError) {
-      console.warn(`Market data unavailable for ${symbol}:`, error, chartError);
+    } catch (quoteError) {
+      console.warn(`Market data unavailable for ${symbol}:`, chartError, quoteError);
       return null;
     }
   }
@@ -212,24 +217,18 @@ export async function getQuotes(tickers: string[], options: { forceRefresh?: boo
   }
 
   if (missing.length) {
-    try {
-      const yahooSymbols = missing.map(yahooSymbol);
-      const symbolList = yahooSymbols.map(encodeURIComponent).join(',');
-      const json = await fetchJson(`/api/yahoo/v7/finance/quote?symbols=${symbolList}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent,regularMarketVolume,marketCap,trailingPE,forwardPE,fiftyTwoWeekHigh,fiftyTwoWeekLow,averageDailyVolume3Month,averageVolume,beta,shortName,longName,sector,industry,regularMarketPreviousClose,regularMarketOpen,regularMarketDayHigh,regularMarketDayLow,epsTrailingTwelveMonths,dividendYield`);
-      const rows = json?.quoteResponse?.result ?? [];
-      missing.forEach((symbol, index) => {
-        const raw = rows.find((row: any) => row.symbol === yahooSymbols[index]) ?? rows[index];
-        const quote = mapYahooQuote(raw, symbol);
-        results[symbol] = quote;
-        if (quote) quoteCache.set(symbol, { data: quote, ts: Date.now() });
-      });
-    } catch (error) {
-      console.warn('Batch market data unavailable:', error);
-      await Promise.all(missing.map(async symbol => {
-        const quote = await getQuote(symbol, { forceRefresh: true });
-        results[symbol] = quote;
-      }));
-    }
+    // The v7 batch endpoint is gated behind an auth crumb, so fan out over the
+    // keyless chart endpoint instead. One request per symbol, all in parallel.
+    const settled = await Promise.allSettled(missing.map(symbol => getQuoteFromChart(symbol)));
+    settled.forEach((outcome, index) => {
+      const symbol = missing[index];
+      const quote = outcome.status === 'fulfilled' ? outcome.value : null;
+      results[symbol] = quote;
+      if (quote) quoteCache.set(symbol, { data: quote, ts: Date.now() });
+      else if (outcome.status === 'rejected') {
+        console.warn(`Market data unavailable for ${symbol}:`, outcome.reason);
+      }
+    });
   }
 
   return results;
@@ -265,14 +264,39 @@ export async function getHistoricalPrices(ticker: string, range: TimeRange = '1Y
   }
 }
 
+/**
+ * Fields the chart endpoint cannot supply (market cap, P/E, EPS, ...). They live
+ * behind Yahoo's crumb-gated quote API, so the backend fetches them via yfinance,
+ * which performs that handshake server-side. Returns {} when the backend is down —
+ * the caller keeps the chart-derived quote rather than failing outright.
+ */
+async function getBackendFundamentals(symbol: string): Promise<Partial<MarketQuote>> {
+  try {
+    const raw = await fetchJson(`/api/portfolio/fundamentals/${encodeURIComponent(symbol)}`, 8_000);
+    const picked: Partial<MarketQuote> = {};
+    if (Number(raw?.marketCap) > 0) picked.marketCap = Number(raw.marketCap);
+    if (Number(raw?.peRatio) > 0) picked.peRatio = Number(raw.peRatio);
+    if (Number(raw?.eps)) picked.eps = Number(raw.eps);
+    if (Number(raw?.beta) > 0) picked.beta = Number(raw.beta);
+    if (Number(raw?.avgVolume) > 0) picked.avgVolume = Number(raw.avgVolume);
+    if (Number(raw?.dividendYield) > 0) picked.dividendYield = Number(raw.dividendYield);
+    if (raw?.sector && raw.sector !== 'N/A') picked.sector = String(raw.sector);
+    if (raw?.industry) picked.industry = String(raw.industry);
+    return picked;
+  } catch {
+    return {};
+  }
+}
+
 export async function getFundamentals(ticker: string): Promise<Partial<StockQuote> | null> {
   const symbol = ticker.trim().toUpperCase();
   const cached = fundamentalsCache.get(symbol);
   if (isFresh(cached, FUNDAMENTALS_TTL)) return cached!.data;
   const quote = await getQuote(symbol);
   if (!quote) return null;
-  fundamentalsCache.set(symbol, { data: quote, ts: Date.now() });
-  return quote;
+  const enriched = { ...quote, ...await getBackendFundamentals(symbol) };
+  fundamentalsCache.set(symbol, { data: enriched, ts: Date.now() });
+  return enriched;
 }
 
 export async function getMarketSummary(options: { forceRefresh?: boolean } = {}): Promise<MarketSummaryItem[]> {
@@ -321,7 +345,15 @@ export function getDataFreshness(quote?: MarketQuote | null) {
   };
 }
 
-export function searchMarketSymbols(query: string): Array<{ symbol: string; name: string; sector: string }> {
+export interface SymbolSearchResult {
+  symbol: string;
+  name: string;
+  sector: string;
+  exchange?: string;
+}
+
+/** Instant local search over the bundled STOCK_DATABASE (no network). */
+export function searchMarketSymbols(query: string): SymbolSearchResult[] {
   const q = query.trim().toLowerCase();
   return Object.values(STOCK_DATABASE)
     .filter(stock => !q || stock.symbol?.toLowerCase().includes(q) || stock.name?.toLowerCase().includes(q) || stock.sector?.toLowerCase().includes(q))
@@ -331,6 +363,100 @@ export function searchMarketSymbols(query: string): Array<{ symbol: string; name
       sector: stock.sector ?? 'Unknown',
     }))
     .slice(0, 12);
+}
+
+// Yahoo exchange codes grouped by the market suffix they map to. Used to keep a
+// live search result inside the market the user is actually browsing.
+const EXCHANGE_BY_SUFFIX: Record<string, string[]> = {
+  '.SA': ['SAO'],
+  '.L': ['LSE'],
+  '.DE': ['GER', 'FRA', 'STU', 'MUN', 'DUS', 'HAM', 'BER', 'XETRA'],
+  '.PA': ['PAR'],
+  '.T': ['JPX', 'TSE'],
+  '.HK': ['HKG'],
+};
+
+const searchCache = new Map<string, { data: SymbolSearchResult[]; ts: number }>();
+const SEARCH_TTL = 5 * 60_000;
+
+/**
+ * Live symbol search across every exchange Yahoo indexes — not just the bundled
+ * database — so names like Vivo (VIVT3.SA) or Oi (OIBR3.SA) resolve.
+ * - `suffix === undefined` → GLOBAL: every exchange, no market filter.
+ * - `suffix === ''`        → US-listed only (no dotted suffix).
+ * - `suffix === '.XX'`     → that market only.
+ * Falls back to the local database on any failure.
+ */
+export async function searchYahooSymbols(query: string, suffix?: string): Promise<SymbolSearchResult[]> {
+  const q = query.trim();
+  if (q.length < 1) return [];
+  const cacheKey = `${suffix ?? '*'}:${q.toLowerCase()}`;
+  const cached = searchCache.get(cacheKey);
+  if (isFresh(cached, SEARCH_TTL)) return cached!.data;
+
+  // Brand aliases first — these fix cases Yahoo's name index misses (Vivo, Oi, ...).
+  const aliasHits: SymbolSearchResult[] = lookupAliases(q, suffix).map(a => ({
+    symbol: a.ticker, name: a.name, sector: a.sector,
+  }));
+
+  try {
+    const json = await fetchJson(`/api/yahoo/v1/finance/search?q=${encodeURIComponent(q)}&quotesCount=20&newsCount=0`, 6_000);
+    const quotes: any[] = json?.quotes ?? [];
+    const allowedExchanges = suffix ? EXCHANGE_BY_SUFFIX[suffix] : undefined;
+
+    const live = quotes
+      .filter(item => {
+        const symbol: string = item?.symbol ?? '';
+        if (!symbol) return false;
+        const type = String(item?.quoteType ?? '').toUpperCase();
+        if (type !== 'EQUITY' && type !== 'ETF') return false;
+        if (suffix === undefined) {
+          // Global search: accept every equity/ETF Yahoo returns.
+          return true;
+        }
+        if (suffix === '') {
+          // US market: no dotted suffix (AAPL, not AAPL.SA).
+          return !symbol.includes('.');
+        }
+        // Prefer the exact suffix, but also accept the exchange code as a guard
+        // for the rare symbol Yahoo returns without one.
+        return symbol.toUpperCase().endsWith(suffix.toUpperCase())
+          || (allowedExchanges?.includes(String(item?.exchange ?? '')) ?? false);
+      })
+      .map(item => ({
+        symbol: String(item.symbol),
+        name: String(item.shortname || item.longname || item.symbol),
+        sector: String(item.sector || item.industry || 'Equity'),
+        exchange: String(item.exchDisp || item.exchange || ''),
+      }));
+
+    // Aliases first, then live results, de-duplicated by symbol.
+    const seen = new Set<string>();
+    const results: SymbolSearchResult[] = [];
+    for (const r of [...aliasHits, ...live]) {
+      const key = r.symbol.toUpperCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      results.push(r);
+    }
+    const trimmed = results.slice(0, 12);
+    searchCache.set(cacheKey, { data: trimmed, ts: Date.now() });
+    return trimmed;
+  } catch {
+    // Network/proxy failure — fall back to aliases + the bundled database.
+    const local = searchMarketSymbols(q).filter(r =>
+      suffix === undefined ? true
+      : suffix === '' ? !r.symbol.includes('.')
+      : r.symbol.toUpperCase().endsWith(suffix.toUpperCase())
+    );
+    const seen = new Set<string>();
+    return [...aliasHits, ...local].filter(r => {
+      const key = r.symbol.toUpperCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
 }
 
 export const DATA_SOURCE_LABEL = 'Data source: Yahoo Finance';

@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-import { Search } from 'lucide-react';
+import { Search, Loader2 } from 'lucide-react';
 import { STOCK_DATABASE } from '../../data/mockStocks';
 import { MARKETS, addSuffix, displayTicker } from '../../config/markets';
 import { usePortfolioStore } from '../../store/portfolioStore';
+import { searchYahooSymbols, type SymbolSearchResult } from '../../services/marketDataService';
 
 interface Props {
   onSelect: (ticker: string) => void;
@@ -14,8 +15,10 @@ export default function StockSearch({ onSelect, placeholder = 'Search ticker...'
   const market = MARKETS.find(m => m.id === activeMarketId) ?? MARKETS[0];
 
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<{ symbol: string; name: string; sector: string }[]>([]);
+  const [results, setResults] = useState<SymbolSearchResult[]>([]);
+  const [loading, setLoading] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const reqId = useRef(0);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -27,18 +30,17 @@ export default function StockSearch({ onSelect, placeholder = 'Search ticker...'
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // Reset results when market changes
+  // Reset when the market changes.
   useEffect(() => {
     setQuery('');
     setResults([]);
   }, [activeMarketId]);
 
-  const handleChange = (value: string) => {
-    setQuery(value);
-    if (!value.trim()) { setResults([]); return; }
+  // Instant local matches from the bundled database — shown while the live
+  // Yahoo search request (which covers every listed company) is in flight.
+  function localMatches(value: string): SymbolSearchResult[] {
     const q = value.toLowerCase();
-
-    const filtered = Object.values(STOCK_DATABASE)
+    return Object.values(STOCK_DATABASE)
       .filter(s => {
         const sym = (s.symbol ?? '').toLowerCase();
         const name = (s.name ?? '').toLowerCase();
@@ -47,26 +49,44 @@ export default function StockSearch({ onSelect, placeholder = 'Search ticker...'
         }
         const suffix = market.suffix.toLowerCase();
         return sym.endsWith(suffix) && (
-          sym.includes(q) ||
-          name.includes(q) ||
-          displayTicker(sym).toLowerCase().includes(q)
+          sym.includes(q) || name.includes(q) || displayTicker(sym).toLowerCase().includes(q)
         );
       })
       .map(s => ({ symbol: s.symbol ?? '', name: s.name ?? '', sector: s.sector ?? '' }))
       .slice(0, 8);
+  }
 
-    // If no local match, offer a live ticker with the correct suffix
-    if (filtered.length === 0 && value.trim().length >= 1) {
-      const raw = value.trim().toUpperCase().replace(/\.(SA|L|DE|PA|T|HK)$/i, '');
-      filtered.push({
-        symbol: addSuffix(raw, activeMarketId),
-        name: `Search live: ${addSuffix(raw, activeMarketId)}`,
-        sector: market.name,
-      });
-    }
+  // Debounced live search against Yahoo, scoped to the active market.
+  useEffect(() => {
+    const value = query.trim();
+    if (!value) { setResults([]); setLoading(false); return; }
 
-    setResults(filtered);
-  };
+    setResults(localMatches(value));
+    setLoading(true);
+    const id = ++reqId.current;
+    const timer = window.setTimeout(async () => {
+      const live = await searchYahooSymbols(value, market.suffix);
+      if (id !== reqId.current) return; // a newer keystroke superseded this one
+      // Merge live results over local, de-duplicated by symbol.
+      const seen = new Set<string>();
+      const merged: SymbolSearchResult[] = [];
+      for (const r of [...live, ...localMatches(value)]) {
+        const key = r.symbol.toUpperCase();
+        if (seen.has(key)) continue;
+        seen.add(key);
+        merged.push(r);
+      }
+      // Last-resort: offer the raw typed ticker with the market suffix applied.
+      if (merged.length === 0) {
+        const raw = value.toUpperCase().replace(/\.(SA|L|DE|PA|T|HK)$/i, '');
+        merged.push({ symbol: addSuffix(raw, activeMarketId), name: `Search: ${addSuffix(raw, activeMarketId)}`, sector: market.name });
+      }
+      setResults(merged.slice(0, 10));
+      setLoading(false);
+    }, 250);
+
+    return () => window.clearTimeout(timer);
+  }, [query, activeMarketId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSelect = (symbol: string) => {
     onSelect(symbol);
@@ -116,10 +136,17 @@ export default function StockSearch({ onSelect, placeholder = 'Search ticker...'
             pointerEvents: 'none',
           }}
         />
+        {loading && (
+          <Loader2
+            size={14}
+            className="animate-spin"
+            style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-lo)', pointerEvents: 'none' }}
+          />
+        )}
         <input
           type="text"
           value={query}
-          onChange={e => handleChange(e.target.value)}
+          onChange={e => setQuery(e.target.value)}
           placeholder={placeholder}
           style={{ paddingLeft: 32, width: '100%' }}
           autoComplete="off"
