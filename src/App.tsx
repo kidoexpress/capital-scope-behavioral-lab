@@ -17,6 +17,7 @@ const TerminalPage = lazy(() => import('./pages/Terminal'));
 const StockResearch = lazy(() => import('./pages/StockResearch'));
 const GoldMiningScanner = lazy(() => import('./pages/GoldMiningScanner'));
 const PaperTrading = lazy(() => import('./pages/PaperTrading'));
+const SyntheticPortfolioLab = lazy(() => import('./pages/SyntheticPortfolioLab'));
 
 function RouteFallback() {
   return (
@@ -47,6 +48,7 @@ export default function App() {
           <Route path="scenarios"  element={page(<ScenarioSimulator />)} />
           <Route path="watchlist"  element={page(<Watchlist />)} />
           <Route path="paper-trading" element={page(<PaperTrading />)} />
+          <Route path="synthetic-portfolio-lab" element={page(<SyntheticPortfolioLab />)} />
           {/* AI Agents */}
           <Route path="agents/earnings" element={page(<EarningsReviewer />)} />
           <Route path="agents/research" element={page(<MarketResearchAgent />)} />
