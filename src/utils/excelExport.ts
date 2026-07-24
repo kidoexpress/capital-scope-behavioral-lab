@@ -40,7 +40,7 @@ function buildSummarySheet(
   scenarios: ModelScenario[]
 ): unknown[][] {
   const rows: unknown[][] = [];
-  rows.push(['CAPITALSCOPE TERMINAL', '', '', '', '']);
+  rows.push(['CAPITAL SCOPE BEHAVIORAL LAB', '', '', '', '']);
   rows.push([`Investment Model — ${company.symbol}`, '', '', '', '']);
   rows.push([`${company.name}`, '', '', '', '']);
   rows.push([`Generated: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`, '', '', '', '']);
@@ -207,7 +207,7 @@ export function exportModelToExcel(
   addSheet(wb, 'Historical Financials', buildFinancialsSheet(company));
   addSheet(wb, 'ROI Scenarios', buildScenariosSheet(scenarios, entryPrice, investmentAmount));
 
-  const filename = `${company.symbol}_CapitalScope_Model_${new Date().toISOString().split('T')[0]}.xlsx`;
+  const filename = `${company.symbol}_CapitalScopeBehavioralLab_Model_${new Date().toISOString().split('T')[0]}.xlsx`;
   XLSX.writeFile(wb, filename);
 }
 
@@ -221,7 +221,7 @@ export function exportModelToCSV(
 ): void {
   const shares = investmentAmount / entryPrice;
   const rows = [
-    ['CapitalScope Terminal — Investment Model'],
+    ['Capital Scope Behavioral Lab — Investment Model'],
     [`${company.name} (${company.symbol})`],
     ['Educational Analysis Only — Not Financial Advice'],
     [''],

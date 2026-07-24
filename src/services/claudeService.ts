@@ -20,7 +20,7 @@ async function callClaude(
   const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
 
   if (!apiKey) {
-    console.warn('[CapitalScope] No VITE_ANTHROPIC_API_KEY set — using demo data. Add your key to .env.local for live AI analysis.');
+    console.warn('[CapitalScopeBehavioralLab] No VITE_ANTHROPIC_API_KEY set — using demo data. Add your key to .env.local for live AI analysis.');
     const mock = getMockResponse(systemPrompt, userMessage);
     const demoPrefix = '⚠️ DEMO MODE — Add VITE_ANTHROPIC_API_KEY to .env.local for live AI analysis.\n\n---\n\n';
     const mockWithPrefix = demoPrefix + mock;

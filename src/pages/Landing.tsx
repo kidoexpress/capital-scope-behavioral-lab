@@ -172,7 +172,7 @@ function ResearchPreview() {
         <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#febc2e" }} />
         <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#28c840" }} />
         <span style={{ marginLeft: 10, fontSize: 11, fontFamily: "monospace", color: "rgba(255,255,255,0.22)" }}>
-          capitalscope — deep dive research
+          capital-scope-behavioral-lab — deep dive research
         </span>
       </div>
 

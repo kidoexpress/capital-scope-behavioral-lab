@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 from .engine import engine
 
 
-app = FastAPI(title="CapitalScope Paper Trading API")
+app = FastAPI(title="Capital Scope Behavioral Lab — Paper Trading API")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5273", "http://localhost:5274", "http://127.0.0.1:5273", "http://127.0.0.1:5274"],

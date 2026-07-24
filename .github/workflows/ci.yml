@@ -1,4 +1,4 @@
-name: CapitalScope CI
+name: Capital Scope Behavioral Lab CI
 
 on:
   push:

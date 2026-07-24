@@ -187,7 +187,9 @@ export function FooterBackgroundGradient() {
   );
 }
 
-/* ─── CapitalScope Footer ────────────────────────────────────── */
+/* ─── Capital Scope Behavioral Lab Footer ─────────────────────── */
+/* NOTE: the exported symbol name `CapitalScopeFooter` is kept intentionally
+   to avoid churning imports; only the displayed brand text was updated. */
 const CORE_TOOLS = [
   { label: "Stock Analyzer", to: "/analyzer" },
   { label: "Portfolio Builder", to: "/portfolio" },
@@ -303,7 +305,7 @@ export function CapitalScopeFooter() {
                   WebkitTextFillColor: "transparent",
                 }}
               >
-                CapitalScope
+                Capital Scope Behavioral Lab
               </span>
             </div>
 
@@ -434,7 +436,7 @@ export function CapitalScopeFooter() {
           }}
         >
           <p style={{ fontSize: 11, color: "rgba(255,255,255,0.16)" }}>
-            © {new Date().getFullYear()} CapitalScope. For educational purposes only. Not financial advice.
+            © {new Date().getFullYear()} Capital Scope Behavioral Lab. Research simulation for educational purposes only. Not financial advice.
           </p>
           <p style={{ fontSize: 11, color: "rgba(255,255,255,0.1)" }}>
             Local research platform

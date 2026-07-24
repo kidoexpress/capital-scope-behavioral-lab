@@ -128,7 +128,7 @@ export default function RiskDashboard() {
           <div className="risk-empty-icon"><Layers3 size={22} /></div>
           <div>
             <strong>Add at least 2 holdings to calculate correlation and portfolio risk.</strong>
-            <span>CapitalScope can still show basic exposure, but institutional portfolio risk needs multiple positions.</span>
+            <span>Capital Scope Behavioral Lab can still show basic exposure, but institutional portfolio risk needs multiple positions.</span>
           </div>
           <button onClick={() => navigate('/portfolio')}>
             Open Portfolio Builder <ArrowRight size={15} />

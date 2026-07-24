@@ -22,7 +22,7 @@ function mkLine(type: TerminalLine['type'], content: string): TerminalLine {
 
 const HELP_TEXT = `
 ╔══════════════════════════════════════════════════════════════╗
-║         CAPITALSCOPE TERMINAL — COMMAND REFERENCE           ║
+║       CAPITAL SCOPE BEHAVIORAL LAB — COMMAND REFERENCE       ║
 ╚══════════════════════════════════════════════════════════════╝
 
 STOCK ANALYSIS
@@ -62,7 +62,7 @@ TIPS
   · Tickers: AAPL MSFT NVDA GOOGL TSLA META AMZN
 `.trim();
 
-const VERSION_TEXT = `CapitalScope Terminal v2.5.0
+const VERSION_TEXT = `Capital Scope Behavioral Lab v2.5.0
 Claude-powered Investment Research Platform
 Built with React + TypeScript + Vite + TailwindCSS
 AI Engine: Claude claude-opus-4-5 (streaming)
@@ -80,10 +80,10 @@ const DEMO_SEQUENCE = [
 export default function TerminalPage() {
   const [lines, setLines] = useState<TerminalLine[]>([
     mkLine('info', '╔══════════════════════════════════════════════════════════╗'),
-    mkLine('info', '║         CAPITALSCOPE TERMINAL — COMMAND MODE            ║'),
+    mkLine('info', '║       CAPITAL SCOPE BEHAVIORAL LAB — COMMAND MODE        ║'),
     mkLine('info', '╚══════════════════════════════════════════════════════════╝'),
     mkLine('info', ''),
-    mkLine('output', 'Welcome to CapitalScope Terminal v2.5'),
+    mkLine('output', 'Welcome to Capital Scope Behavioral Lab v2.5'),
     mkLine('output', 'Type  help  to see available commands.'),
     mkLine('output', 'Type  demo  for a guided walkthrough.'),
     mkLine('info', ''),
@@ -344,7 +344,7 @@ export default function TerminalPage() {
       <div className="flex items-center gap-3 px-4 py-2 border-b border-slate-800/80"
            style={{ background: 'rgba(6,6,16,0.95)' }}>
         <TerminalSquare size={14} className="text-green-400" />
-        <span className="text-xs font-semibold text-slate-400 tracking-widest">CAPITALSCOPE TERMINAL</span>
+        <span className="text-xs font-semibold text-slate-400 tracking-widest">CAPITAL SCOPE BEHAVIORAL LAB</span>
         <span className="text-xs text-slate-700 ml-auto">Tab: autocomplete · ↑↓: history · Enter: execute</span>
       </div>
 

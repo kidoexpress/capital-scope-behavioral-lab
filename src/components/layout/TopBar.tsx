@@ -5,7 +5,7 @@ import { searchYahooSymbols, type SymbolSearchResult } from '../../services/mark
 import { displayTicker, getMarketFromTicker } from '../../config/markets';
 
 const PAGE_META: Record<string, { title: string; crumb: string }> = {
-  '/':                  { title: 'CapitalScope',    crumb: 'Home'        },
+  '/':                  { title: 'Capital Scope Behavioral Lab', crumb: 'Home' },
   '/analyzer':          { title: 'Stock Analyzer',  crumb: 'Analyzer'    },
   '/portfolio':         { title: 'Portfolio',       crumb: 'Builder'     },
   '/risk':              { title: 'Risk',             crumb: 'Dashboard'   },
@@ -23,7 +23,7 @@ const PAGE_META: Record<string, { title: string; crumb: string }> = {
 export default function TopBar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const meta = PAGE_META[location.pathname] ?? { title: 'CapitalScope', crumb: '' };
+  const meta = PAGE_META[location.pathname] ?? { title: 'Capital Scope Behavioral Lab', crumb: '' };
 
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SymbolSearchResult[]>([]);

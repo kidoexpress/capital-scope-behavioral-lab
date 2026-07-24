@@ -1,4 +1,4 @@
-"""CapitalScope Terminal — FastAPI backend entry point.
+"""Capital Scope Behavioral Lab — FastAPI backend entry point.
 
 Run with:
     uvicorn main:app --reload --port 8100
@@ -11,8 +11,8 @@ from paper_trading import router as paper_trading_router
 from paper_trading.proxy import proxy_router
 
 app = FastAPI(
-    title="CapitalScope Terminal API",
-    description="Backend for CapitalScope Terminal: paper trading engine, data feeds, and metrics.",
+    title="Capital Scope Behavioral Lab API",
+    description="Backend for Capital Scope Behavioral Lab: paper trading engine, data feeds, metrics, and simulation.",
     version="1.0.0",
 )
 

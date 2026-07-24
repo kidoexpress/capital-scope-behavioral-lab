@@ -78,8 +78,8 @@ export default function Sidebar() {
       >
         <div className="sidebar-mark">CS</div>
         <div className="sidebar-brand-copy">
-          <strong>CapitalScope</strong>
-          <span>Research OS</span>
+          <strong>Capital Scope</strong>
+          <span>Behavioral Lab</span>
         </div>
       </button>
 
