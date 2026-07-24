@@ -1,126 +1,120 @@
-# CapitalScope Terminal
+# Capital Scope Behavioral Lab
 
-A quantitative stock analysis platform supporting 7 global markets with AI-powered research agents, paper trading simulation, and real-time price data.
+> Laboratório interativo para testar como investidores sintéticos respondem a
+> diferentes condições de mercado e intervenções financeiras.
 
-## Features
+Capital Scope Behavioral Lab é uma evolução do **Capital Scope Terminal** voltada a
+**experimentos com agentes investidores sintéticos**. Ele reaproveita a
+infraestrutura quantitativa existente (paper trading, métricas, gráficos, design
+system) e adiciona um módulo isolado de simulação comportamental inspirado no paper:
 
-- **Multi-market**: US (NYSE/NASDAQ), Brasil (B3), UK (LSE), Germany (XETRA), France (Euronext), Japan (TSE), Hong Kong (HKEX)
-- **Stock Analyzer**: Real-time prices via Yahoo Finance, technical metrics, AI insights
-- **Portfolio Builder**: Holdings manager with real historical performance vs benchmark
-- **Risk Dashboard**: VaR, correlation matrix (1Y historical), sector exposure
-- **Monte Carlo**: GBM simulation with fan chart and percentile bands
-- **Scenario Simulator**: Macro stress tests (rate hike, recession, oil shock, etc.)
-- **Paper Trading**: Virtual portfolios with real yfinance prices, Sharpe/Alpha/MDD metrics
-- **Gold Mining Scanner**: AI-powered stock discovery with live fundamentals
-- **AI Research Agents**: Earnings Reviewer, Market Research, Model Builder (Claude API)
-- **Watchlist**: Live price tracking with sparklines and market sentiment
+> **Can Generative AI Agents Behave Like Humans? Evidence from Laboratory Market
+> Experiments** — arXiv:2505.07457
+> (cópia local em [`docs/references/2505.07457v1.pdf`](docs/references/2505.07457v1.pdf))
+
+O caso de uso principal do MVP é **comparar duas intervenções de comunicação
+financeira** em condições controladas (controle vs. tratamento), medindo o
+**Intervention Effect Score** e um conjunto de métricas comportamentais e de mercado.
+
+> ⚠️ **Isto não é aconselhamento financeiro.** Não há dinheiro real, corretora, nem
+> execução de ordens reais. Os agentes operam sobre um motor de simulação
+> determinístico. O MVP **não** faz chamadas reais de LLM (apenas agentes baseados em regras).
+
+---
+
+## Status
+
+Esta etapa entrega **duplicação, isolamento, rename, documentação e o scaffold vazio**
+do módulo Behavioral Lab (tipos, schemas e interfaces). A primeira implementação
+funcional (agentes baseados em regras + motor de simulação) vem em uma etapa seguinte.
+
+Veja o plano completo em
+[`docs/BEHAVIORAL_LAB_IMPLEMENTATION_PLAN.md`](docs/BEHAVIORAL_LAB_IMPLEMENTATION_PLAN.md).
+
+## Documentação
+
+| Documento | Conteúdo |
+|---|---|
+| [Product Spec](docs/BEHAVIORAL_LAB_PRODUCT_SPEC.md) | Use case, MVP, personas, métricas, linha de chegada |
+| [Research Spec](docs/BEHAVIORAL_LAB_RESEARCH_SPEC.md) | Base científica, equações, desenho experimental |
+| [Implementation Plan](docs/BEHAVIORAL_LAB_IMPLEMENTATION_PLAN.md) | Fases, arquitetura do módulo, interfaces |
+| [Duplication Report](docs/REPOSITORY_DUPLICATION_REPORT.md) | Origem, remotes, branches, commit-base |
+| [Security & Environment](docs/SECURITY_AND_ENVIRONMENT_CHECKLIST.md) | Segredos, isolamento, serviços a recredenciar |
+| [Architecture](docs/ARCHITECTURE.md) | Arquitetura herdada do Capital Scope Terminal |
 
 ## Stack
 
-| Layer | Technology |
+| Camada | Tecnologia |
 |---|---|
 | Frontend | React 19 + Vite + TypeScript + Tailwind CSS |
-| State | Zustand (with localStorage persistence) |
-| Charts | Recharts |
+| Estado | Zustand (persistência em localStorage) |
+| Gráficos | Recharts |
 | Backend | FastAPI (Python) |
-| Data | yfinance (Yahoo Finance) |
-| AI | Anthropic Claude (claude-opus-4-5) |
+| Dados de mercado | yfinance (Yahoo Finance) |
+| IA (opcional, fora do MVP do Lab) | Anthropic Claude |
+| Testes backend | pytest |
 
 ## Setup
 
-### Prerequisites
+### Pré-requisitos
 
 - Node.js 20+
 - Python 3.10+
-- An Anthropic API key (optional — AI agents work in demo mode without it)
+- (Opcional) Chave da Anthropic — os agentes de IA herdados rodam em modo demo sem ela.
 
-### 1. Clone and install
+### 1. Instalar
 
 ```bash
-git clone https://github.com/kidoexpress/CapitalScope-Terminal.git
-cd CapitalScope-Terminal
+cd capital-scope-behavioral-lab
 npm install
 pip install -r requirements.txt
 ```
 
-### 2. Configure environment
+### 2. Configurar ambiente
 
 ```bash
 cp .env.example .env.local
-# Edit .env.local and add your keys
+# Edite .env.local e adicione suas chaves (nunca comite .env.local)
 ```
 
-Required:
-- `VITE_ANTHROPIC_API_KEY` — for live AI analysis (Gold Scanner, Deep Dive, Earnings Reviewer, Market Research, Model Builder). Without this, all AI agents run in demo mode with clearly labeled mock data.
+### 3. Rodar (dois servidores em paralelo — **portas isoladas**)
 
-Optional:
-- `VITE_FMP_API_KEY` — Financial Modeling Prep for analyst ratings
-- `VITE_FINNHUB_API_KEY` — Finnhub for news sentiment
-
-### 3. Run (both servers must run simultaneously)
-
-**Terminal 1 — Backend (FastAPI)**
+O Behavioral Lab usa portas próprias (**5273 / 8100**) para poder rodar ao lado do
+Capital Scope Terminal original (5173 / 8000) sem colisão.
 
 ```bash
-uvicorn main:app --reload --port 8000
-```
+# Terminal 1 — Backend (FastAPI)
+uvicorn main:app --reload --port 8100
 
-**Terminal 2 — Frontend (Vite)**
-
-```bash
+# Terminal 2 — Frontend (Vite)
 npm run dev
 ```
 
-Open http://localhost:5173
+Abra http://localhost:5273
 
-### 4. Build for production
+### 4. Build de produção
 
 ```bash
 npm run build
-uvicorn main:app --port 8000
-# Serve the dist/ folder with any static host or nginx
+uvicorn main:app --port 8100
+# Sirva a pasta dist/ com qualquer host estático ou nginx
 ```
 
-Note: In production, Yahoo Finance data routes through the FastAPI backend proxy (`/api/yahoo/*`). No Vite dev server is needed.
+## Testes
 
-## Architecture
-
-```
-CapitalScope-Terminal/
-├── src/
-│   ├── config/markets.ts       # 7 market definitions (suffix, currency, benchmark)
-│   ├── pages/                  # 14 page components
-│   ├── components/             # Reusable UI components
-│   ├── services/               # API clients (paperTradingApi, claudeService, etc.)
-│   ├── store/                  # Zustand stores (portfolioStore, paperTradingStore)
-│   ├── utils/                  # Helpers (finance, api, priceHistory, marketHours)
-│   └── data/                   # Static data (mockStocks, financialData)
-├── paper_trading/
-│   ├── engine.py               # PaperTradingEngine — backtest + metrics
-│   ├── portfolio.py            # PaperPortfolio — buy/sell/holdings
-│   ├── metrics.py              # Quantitative metrics from scratch (Sharpe, MDD, Alpha...)
-│   ├── data_feed.py            # yfinance + 1h local cache
-│   ├── benchmarks.py           # SPY, QQQ, BOVA11, FTSE100, DAX returns
-│   ├── routes.py               # FastAPI endpoints
-│   └── proxy.py                # Yahoo Finance production proxy
-└── main.py                     # FastAPI app entry point
+```bash
+python -m pytest           # testes do motor de paper trading (herdados)
+npm run lint               # eslint
+npm run build              # inclui type-check (tsc -b)
 ```
 
-## Paper Trading API
+## Relação com o upstream
 
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/api/portfolio/create` | Create virtual portfolio |
-| GET | `/api/portfolio/list` | List all portfolios |
-| GET | `/api/portfolio/{id}` | Get portfolio snapshot with live P&L |
-| POST | `/api/portfolio/{id}/trade` | Execute buy or sell |
-| GET | `/api/portfolio/{id}/metrics` | Performance report (Sharpe, Alpha, MDD...) |
-| GET | `/api/portfolio/{id}/equity-curve` | Equity curve vs benchmarks |
-| GET | `/api/portfolio/fx-rate` | FX conversion rates |
-| GET | `/api/portfolio/fundamentals/{ticker}` | Live fundamentals via yfinance |
-| DELETE | `/api/portfolio/{id}` | Delete portfolio |
-| GET | `/api/yahoo/{path}` | Yahoo Finance proxy (production) |
+Este repositório foi duplicado de `CapitalScope-Terminal` preservando todo o
+histórico Git. O remote `capital-scope-upstream` aponta para o repositório original
+**apenas como referência** para eventuais cherry-picks. Nenhum merge automático é feito.
 
-## Educational disclaimer
+## Aviso legal
 
-All analysis, metrics, and AI-generated content are for educational purposes only. Not financial advice. Verify all data independently before making investment decisions.
+Todo conteúdo é para fins **educacionais e de pesquisa**. Não é aconselhamento
+financeiro. Nenhuma operação real de investimento é executada.

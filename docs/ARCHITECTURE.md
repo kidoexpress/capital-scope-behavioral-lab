@@ -1,6 +1,9 @@
-# CapitalScope Architecture
+# Capital Scope Behavioral Lab — Inherited Architecture
 
-CapitalScope Terminal is organized as a React/Vite product shell backed by a FastAPI paper trading and quantitative analytics service.
+> This document describes the architecture inherited from Capital Scope Terminal.
+> For the Behavioral Lab module see `BEHAVIORAL_LAB_IMPLEMENTATION_PLAN.md`.
+
+Capital Scope Behavioral Lab is organized as a React/Vite product shell backed by a FastAPI paper trading and quantitative analytics service.
 
 All research, forecasts, and simulations are educational only. The platform does not execute trades and does not provide personalized financial advice.
 
