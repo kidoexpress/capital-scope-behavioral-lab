@@ -122,7 +122,12 @@ def apply_constraints(
     if w.get(CASH_ASSET_ID, 0.0) < cons.minimum_cash_weight - 1e-3:
         violations.append("minimum_cash_weight")
     for aid, val in w.items():
+        if aid == CASH_ASSET_ID:
+            continue  # cash is exempt from the single-asset cap
         cap = caps.get(aid, cons.maximum_single_asset_weight)
+        asset = assets_by_id.get(aid)
+        if asset is not None:
+            cap = min(cap, asset.maximum_weight)
         if val > cap + 1e-3:
             violations.append(f"maximum_single_asset_weight:{aid}")
     for aid in cons.restricted_assets:
