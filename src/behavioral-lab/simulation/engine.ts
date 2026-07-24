@@ -26,11 +26,12 @@ export interface SimulationEngine {
 
 /** Placeholder until the functional engine is implemented. */
 export class NotImplementedSimulationEngine implements SimulationEngine {
-  run(
-    _spec: RunSpec,
-    _agents: InvestorAgent[],
-    _intervention: Intervention | null,
-  ): RunResult {
+  run(spec: RunSpec, agents: InvestorAgent[], intervention: Intervention | null): RunResult {
+    // Params are intentionally unused in the stub; referenced so the honest
+    // signature is preserved without tripping no-unused-vars.
+    void spec;
+    void agents;
+    void intervention;
     throw new Error(
       'SimulationEngine.run is not implemented yet — see IMPLEMENTATION_PLAN §4.',
     );
