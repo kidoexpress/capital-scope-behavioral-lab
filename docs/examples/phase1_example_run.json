@@ -1,0 +1,1470 @@
+{
+  "reproducibility": {
+    "experiment_id": "exp1_market_drop",
+    "seed": 42,
+    "code_version": "0.1.0",
+    "model_version": "rules-v1",
+    "created_at": "2026-07-24T18:28:46.803825+00:00",
+    "config": {
+      "experiment_id": "exp1_market_drop",
+      "seed": 42,
+      "persona_keys": [
+        "conservative_wealth_preserver",
+        "trend_following_growth_investor",
+        "contrarian_investor"
+      ],
+      "scenario_keys": [
+        "bear_market",
+        "base_case",
+        "liquidity_crisis"
+      ],
+      "horizon_days": 90,
+      "universe_seed": 12345,
+      "universe_days": 756,
+      "use_memory": true,
+      "intervention": null,
+      "fit_weights": {
+        "persona_adherence": 0.25,
+        "risk_constraint_adherence": 0.2,
+        "liquidity_adherence": 0.15,
+        "behavioral_consistency": 0.15,
+        "scenario_stability": 0.15,
+        "objective_alignment": 0.1,
+        "violation_penalty": 0.1
+      }
+    },
+    "asset_universe": [
+      "EQ_AAPL",
+      "EQ_MSFT",
+      "EQ_TSLA",
+      "EQ_JPM",
+      "EQ_XOM",
+      "EQ_PG",
+      "EQ_JNJ",
+      "ETF_SPY",
+      "ETF_QQQ",
+      "ETF_VNQ",
+      "FI_AGG",
+      "FI_TLT",
+      "FI_SHY",
+      "FI_LQD",
+      "CM_GLD",
+      "CM_DBC",
+      "CM_USO",
+      "CASH"
+    ],
+    "data_period_days": 756,
+    "scenarios": [
+      {
+        "scenario_id": "scenario_bear",
+        "probability": 0.2553
+      },
+      {
+        "scenario_id": "scenario_base",
+        "probability": 0.6383
+      },
+      {
+        "scenario_id": "scenario_liquidity",
+        "probability": 0.1064
+      }
+    ],
+    "personas": [
+      "conservative_wealth_preserver",
+      "trend_following_growth_investor",
+      "contrarian_investor"
+    ]
+  },
+  "results": [
+    {
+      "persona_id": "persona_conservative",
+      "persona": {
+        "persona_id": "persona_conservative",
+        "name": "Conservative Wealth Preserver",
+        "demographics": {
+          "age_range": "55-64",
+          "occupation_type": "business_owner"
+        },
+        "financial_profile": {
+          "portfolio_value": 5000000,
+          "income_stability": 0.8,
+          "investment_horizon_years": 10,
+          "liquidity_need": 0.5,
+          "financial_literacy": 0.7
+        },
+        "behavioral_traits": {
+          "risk_tolerance": 0.25,
+          "loss_aversion": 0.85,
+          "trend_sensitivity": 0.15,
+          "overconfidence": 0.2,
+          "herding": 0.3,
+          "ambiguity_aversion": 0.75,
+          "need_for_control": 0.8,
+          "advisor_trust": 0.7,
+          "ai_trust": 0.35
+        },
+        "objectives": {
+          "primary": "capital_preservation",
+          "secondary": "income_generation"
+        },
+        "constraints": {
+          "minimum_cash_weight": 0.1,
+          "maximum_equity_weight": 0.4,
+          "maximum_single_asset_weight": 0.1,
+          "maximum_expected_drawdown": 0.12,
+          "restricted_assets": []
+        },
+        "dynamic_state": {
+          "stress": 0.2,
+          "confidence": 0.6,
+          "recent_loss": 0.0,
+          "recent_gain": 0.0,
+          "current_strategy": "defensive"
+        },
+        "memory_config": {
+          "enabled": true,
+          "memory_length": 5,
+          "relevance_weight": 0.3,
+          "recency_weight": 0.2,
+          "importance_weight": 0.2,
+          "emotion_weight": 0.1,
+          "objective_weight": 0.1,
+          "reliability_weight": 0.1
+        }
+      },
+      "decisions": [
+        {
+          "persona_id": "persona_conservative",
+          "scenario_id": "scenario_bear",
+          "action": "MOVE_TO_CASH",
+          "target_assets": [
+            "equity",
+            "cash"
+          ],
+          "allocation_changes": {
+            "equity": -0.3,
+            "cash": 0.3
+          },
+          "confidence": 0.372,
+          "request_human_review": true,
+          "reason_codes": [
+            "high_loss_aversion",
+            "volatility_aversion",
+            "drawdown_limit_risk",
+            "memory_informed",
+            "liquidity_preference"
+          ],
+          "memories_used": [
+            "persona_conservative_mem_outcome_1",
+            "persona_conservative_mem_decision_1",
+            "persona_conservative_mem_relational_1"
+          ],
+          "expected_behavioral_effect": {
+            "stress_change": 0.0225,
+            "confidence_change": -0.015
+          }
+        },
+        {
+          "persona_id": "persona_conservative",
+          "scenario_id": "scenario_base",
+          "action": "HOLD",
+          "target_assets": [],
+          "allocation_changes": {},
+          "confidence": 0.516,
+          "request_human_review": false,
+          "reason_codes": [
+            "memory_informed"
+          ],
+          "memories_used": [
+            "persona_conservative_mem_decision_1",
+            "persona_conservative_mem_outcome_1",
+            "persona_conservative_mem_relational_1"
+          ],
+          "expected_behavioral_effect": {
+            "stress_change": -0.001,
+            "confidence_change": 0.001
+          }
+        },
+        {
+          "persona_id": "persona_conservative",
+          "scenario_id": "scenario_liquidity",
+          "action": "MOVE_TO_CASH",
+          "target_assets": [
+            "equity",
+            "cash"
+          ],
+          "allocation_changes": {
+            "equity": -0.3,
+            "cash": 0.3
+          },
+          "confidence": 0.324,
+          "request_human_review": true,
+          "reason_codes": [
+            "high_loss_aversion",
+            "volatility_aversion",
+            "drawdown_limit_risk",
+            "memory_informed",
+            "liquidity_preference"
+          ],
+          "memories_used": [
+            "persona_conservative_mem_decision_1",
+            "persona_conservative_mem_outcome_1",
+            "persona_conservative_mem_relational_1"
+          ],
+          "expected_behavioral_effect": {
+            "stress_change": 0.03,
+            "confidence_change": -0.02
+          }
+        }
+      ],
+      "portfolios": {
+        "equal_weight": {
+          "portfolio_id": "persona_conservative_equal_weight",
+          "weights": {
+            "EQ_AAPL": 0.05294115882347646,
+            "EQ_MSFT": 0.05294115882347646,
+            "EQ_TSLA": 0.05294115882347646,
+            "EQ_JPM": 0.05294115882347646,
+            "EQ_XOM": 0.05294115882347646,
+            "EQ_PG": 0.05294115882347646,
+            "EQ_JNJ": 0.05294115882347646,
+            "ETF_SPY": 0.05294115882347646,
+            "ETF_QQQ": 0.05294115882347646,
+            "ETF_VNQ": 0.05294115882347646,
+            "FI_AGG": 0.05294115882347646,
+            "FI_TLT": 0.05294115882347646,
+            "FI_SHY": 0.05294115882347646,
+            "FI_LQD": 0.05294115882347646,
+            "CM_GLD": 0.05294115882347646,
+            "CM_DBC": 0.05294115882347646,
+            "CM_USO": 0.05294115882347646,
+            "CASH": 0.10000030000089999
+          },
+          "constraint_violations": [],
+          "metrics": {
+            "annualized_return": 0.085185,
+            "volatility": 0.051653,
+            "sharpe_ratio": 0.681172,
+            "sortino_ratio": 0.69687,
+            "max_drawdown": -0.040485,
+            "var_95": -0.005248,
+            "cvar_95": -0.006388,
+            "expected_scenario_return": -0.016594,
+            "expected_drawdown": 0.090648,
+            "scenario_survival_rate": 1.0,
+            "liquidity_score": 0.967706,
+            "concentration": 0.057647,
+            "turnover": 0.0,
+            "objective_alignment": 0.244601
+          },
+          "scenario_results": [],
+          "explanation": {
+            "method": "equal_weight",
+            "constraint_adjustments": [
+              "raised cash to minimum 0.100"
+            ]
+          }
+        },
+        "risk_based": {
+          "portfolio_id": "persona_conservative_risk_based",
+          "weights": {
+            "EQ_AAPL": 0.034289965710034294,
+            "EQ_MSFT": 0.03665496334503666,
+            "EQ_TSLA": 0.02310797689202311,
+            "EQ_JPM": 0.03543296456703544,
+            "EQ_XOM": 0.03374596625403375,
+            "EQ_PG": 0.05594694405305595,
+            "EQ_JNJ": 0.053148946851053154,
+            "ETF_SPY": 0.042519957480042524,
+            "ETF_QQQ": 0.03543296456703544,
+            "ETF_VNQ": 0.03865396134603866,
+            "FI_AGG": 0.09999990000010002,
+            "FI_TLT": 0.05061894938105062,
+            "FI_SHY": 0.09999990000010002,
+            "FI_LQD": 0.07592792407207594,
+            "CM_GLD": 0.04724395275604725,
+            "CM_DBC": 0.03865396134603866,
+            "CM_USO": 0.026574973425026578,
+            "CASH": 0.17204582795417206
+          },
+          "constraint_violations": [],
+          "metrics": {
+            "annualized_return": 0.067885,
+            "volatility": 0.034143,
+            "sharpe_ratio": 0.523816,
+            "sortino_ratio": 0.532025,
+            "max_drawdown": -0.023866,
+            "var_95": -0.003255,
+            "cvar_95": -0.004135,
+            "expected_scenario_return": -0.009509,
+            "expected_drawdown": 0.069287,
+            "scenario_survival_rate": 1.0,
+            "liquidity_score": 0.970262,
+            "concentration": 0.078319,
+            "turnover": 0.192363,
+            "objective_alignment": 0.422606
+          },
+          "scenario_results": [],
+          "explanation": {
+            "method": "risk_based",
+            "constraint_adjustments": [
+              "capped FI_AGG to 0.100",
+              "capped FI_SHY to 0.100"
+            ]
+          }
+        },
+        "persona_rule_based": {
+          "portfolio_id": "persona_conservative_persona_rule_based",
+          "weights": {
+            "EQ_AAPL": 0.05329289341421318,
+            "EQ_MSFT": 0.057733884532230946,
+            "EQ_TSLA": 0.025192949614100776,
+            "EQ_JPM": 0.04948590102819796,
+            "EQ_XOM": 0.046186907626184756,
+            "EQ_PG": 0.08660082679834641,
+            "EQ_JNJ": 0.08150683698632603,
+            "FI_AGG": 0.07497885004229993,
+            "FI_TLT": 0.028837942324115354,
+            "FI_SHY": 0.09999980000040003,
+            "FI_LQD": 0.04686190627618746,
+            "CM_GLD": 0.0008149983700032601,
+            "CM_DBC": 0.0006869986260027481,
+            "CM_USO": 0.0003729992540014921,
+            "CASH": 0.34744630510738983
+          },
+          "constraint_violations": [],
+          "metrics": {
+            "annualized_return": 0.057221,
+            "volatility": 0.038076,
+            "sharpe_ratio": 0.189653,
+            "sortino_ratio": 0.194041,
+            "max_drawdown": -0.033387,
+            "var_95": -0.003615,
+            "cvar_95": -0.004664,
+            "expected_scenario_return": -0.013699,
+            "expected_drawdown": 0.083736,
+            "scenario_survival_rate": 1.0,
+            "liquidity_score": 0.982005,
+            "concentration": 0.164903,
+            "turnover": 0.383912,
+            "objective_alignment": 0.302202
+          },
+          "scenario_results": [],
+          "explanation": {
+            "method": "persona_rule_based",
+            "class_targets": {
+              "equity": 0.4000000000000001,
+              "fixed_income": 0.338125,
+              "commodity": 0.0018750000000000006,
+              "cash": 0.26000000000000006
+            },
+            "constraint_adjustments": [
+              "capped FI_SHY to 0.100"
+            ]
+          }
+        },
+        "behavioral_scenario": {
+          "portfolio_id": "persona_conservative_behavioral_scenario",
+          "weights": {
+            "EQ_AAPL": 0.03883592232815535,
+            "EQ_MSFT": 0.04207191585616829,
+            "EQ_TSLA": 0.01835896328207344,
+            "EQ_JPM": 0.03606192787614425,
+            "EQ_XOM": 0.03365793268413464,
+            "EQ_PG": 0.06310787378425244,
+            "EQ_JNJ": 0.05939588120823759,
+            "FI_AGG": 0.07497885004229993,
+            "FI_TLT": 0.028837942324115354,
+            "FI_SHY": 0.09999980000040003,
+            "FI_LQD": 0.04686190627618746,
+            "CM_GLD": 0.0008149983700032601,
+            "CM_DBC": 0.0006869986260027481,
+            "CM_USO": 0.0003729992540014921,
+            "CASH": 0.4559560880878239
+          },
+          "constraint_violations": [],
+          "metrics": {
+            "annualized_return": 0.049228,
+            "volatility": 0.028164,
+            "sharpe_ratio": -0.027397,
+            "sortino_ratio": -0.027863,
+            "max_drawdown": -0.023301,
+            "var_95": -0.002702,
+            "cvar_95": -0.003428,
+            "expected_scenario_return": -0.007974,
+            "expected_drawdown": 0.061588,
+            "scenario_survival_rate": 1.0,
+            "liquidity_score": 0.984068,
+            "concentration": 0.240106,
+            "turnover": 0.441674,
+            "objective_alignment": 0.486768
+          },
+          "scenario_results": [
+            {
+              "scenario_id": "scenario_bear",
+              "action": "MOVE_TO_CASH",
+              "equity_delta": -0.3,
+              "probability": 0.2553,
+              "request_human_review": true
+            },
+            {
+              "scenario_id": "scenario_base",
+              "action": "HOLD",
+              "equity_delta": 0.0,
+              "probability": 0.6383,
+              "request_human_review": false
+            },
+            {
+              "scenario_id": "scenario_liquidity",
+              "action": "MOVE_TO_CASH",
+              "equity_delta": -0.3,
+              "probability": 0.1064,
+              "request_human_review": true
+            }
+          ],
+          "explanation": {
+            "persona_id": "persona_conservative",
+            "objective": {
+              "primary": "capital_preservation",
+              "secondary": "income_generation"
+            },
+            "scenarios_weighted": [
+              {
+                "scenario_id": "scenario_base",
+                "name": "Base Case",
+                "probability": 0.6383,
+                "regime": "sideways"
+              },
+              {
+                "scenario_id": "scenario_bear",
+                "name": "Bear Market",
+                "probability": 0.2553,
+                "regime": "bear"
+              },
+              {
+                "scenario_id": "scenario_liquidity",
+                "name": "Liquidity Crisis",
+                "probability": 0.1064,
+                "regime": "risk_off"
+              }
+            ],
+            "behavioral_influences": [
+              {
+                "scenario_id": "scenario_bear",
+                "action": "MOVE_TO_CASH",
+                "equity_delta": -0.3,
+                "probability": 0.2553,
+                "reason_codes": [
+                  "high_loss_aversion",
+                  "volatility_aversion",
+                  "drawdown_limit_risk",
+                  "memory_informed",
+                  "liquidity_preference"
+                ],
+                "memories_used": [
+                  "persona_conservative_mem_outcome_1",
+                  "persona_conservative_mem_decision_1",
+                  "persona_conservative_mem_relational_1"
+                ]
+              },
+              {
+                "scenario_id": "scenario_base",
+                "action": "HOLD",
+                "equity_delta": 0.0,
+                "probability": 0.6383,
+                "reason_codes": [
+                  "memory_informed"
+                ],
+                "memories_used": [
+                  "persona_conservative_mem_decision_1",
+                  "persona_conservative_mem_outcome_1",
+                  "persona_conservative_mem_relational_1"
+                ]
+              },
+              {
+                "scenario_id": "scenario_liquidity",
+                "action": "MOVE_TO_CASH",
+                "equity_delta": -0.3,
+                "probability": 0.1064,
+                "reason_codes": [
+                  "high_loss_aversion",
+                  "volatility_aversion",
+                  "drawdown_limit_risk",
+                  "memory_informed",
+                  "liquidity_preference"
+                ],
+                "memories_used": [
+                  "persona_conservative_mem_decision_1",
+                  "persona_conservative_mem_outcome_1",
+                  "persona_conservative_mem_relational_1"
+                ]
+              }
+            ],
+            "memories_used": [
+              "persona_conservative_mem_decision_1",
+              "persona_conservative_mem_outcome_1",
+              "persona_conservative_mem_relational_1"
+            ],
+            "class_targets_before": {
+              "equity": 0.4,
+              "fixed_income": 0.3381,
+              "commodity": 0.0019,
+              "cash": 0.26
+            },
+            "class_targets_after": {
+              "equity": 0.2915,
+              "fixed_income": 0.2507,
+              "commodity": 0.0019,
+              "cash": 0.456
+            },
+            "constraint_adjustments": [
+              "capped FI_SHY to 0.100"
+            ],
+            "constraint_violations": [],
+            "limited_assets": [
+              "FI_SHY"
+            ],
+            "remaining_risks": [],
+            "method": "behavioral_scenario",
+            "equity_tilt": -0.1085
+          }
+        }
+      },
+      "behavioral_portfolio_fit": {
+        "persona_adherence": 0.8691,
+        "risk_constraint_adherence": 1.0,
+        "liquidity_adherence": 0.992,
+        "behavioral_consistency": 0.0817,
+        "scenario_stability": 0.8229,
+        "objective_alignment": 0.4868,
+        "behavioral_portfolio_fit": 0.7504,
+        "violation_penalty": 0.0
+      },
+      "persona_metrics": {
+        "action_entropy": 0.9183,
+        "decision_consistency": 0.0817,
+        "strategy_switch_rate": 1.0,
+        "scenario_sensitivity": 0.1414,
+        "memory_influence_score": 0.3333
+      }
+    },
+    {
+      "persona_id": "persona_trend",
+      "persona": {
+        "persona_id": "persona_trend",
+        "name": "Trend-Following Growth Investor",
+        "demographics": {
+          "age_range": "30-39",
+          "occupation_type": "tech_worker"
+        },
+        "financial_profile": {
+          "portfolio_value": 750000,
+          "income_stability": 0.6,
+          "investment_horizon_years": 15,
+          "liquidity_need": 0.25,
+          "financial_literacy": 0.6
+        },
+        "behavioral_traits": {
+          "risk_tolerance": 0.8,
+          "loss_aversion": 0.3,
+          "trend_sensitivity": 0.9,
+          "overconfidence": 0.6,
+          "herding": 0.65,
+          "ambiguity_aversion": 0.3,
+          "need_for_control": 0.4,
+          "advisor_trust": 0.35,
+          "ai_trust": 0.65
+        },
+        "objectives": {
+          "primary": "aggressive_growth",
+          "secondary": "momentum_capture"
+        },
+        "constraints": {
+          "minimum_cash_weight": 0.02,
+          "maximum_equity_weight": 0.95,
+          "maximum_single_asset_weight": 0.3,
+          "maximum_expected_drawdown": 0.45,
+          "restricted_assets": []
+        },
+        "dynamic_state": {
+          "stress": 0.25,
+          "confidence": 0.75,
+          "recent_loss": 0.0,
+          "recent_gain": 0.0,
+          "current_strategy": "momentum"
+        },
+        "memory_config": {
+          "enabled": true,
+          "memory_length": 3,
+          "relevance_weight": 0.3,
+          "recency_weight": 0.2,
+          "importance_weight": 0.2,
+          "emotion_weight": 0.1,
+          "objective_weight": 0.1,
+          "reliability_weight": 0.1
+        }
+      },
+      "decisions": [
+        {
+          "persona_id": "persona_trend",
+          "scenario_id": "scenario_bear",
+          "action": "MOVE_TO_CASH",
+          "target_assets": [
+            "equity",
+            "cash"
+          ],
+          "allocation_changes": {
+            "equity": -0.2199,
+            "cash": 0.2199
+          },
+          "confidence": 0.686,
+          "request_human_review": false,
+          "reason_codes": [
+            "volatility_aversion",
+            "memory_informed"
+          ],
+          "memories_used": [
+            "persona_trend_mem_outcome_1",
+            "persona_trend_mem_relational_1"
+          ],
+          "expected_behavioral_effect": {
+            "stress_change": 0.0225,
+            "confidence_change": -0.015
+          }
+        },
+        {
+          "persona_id": "persona_trend",
+          "scenario_id": "scenario_base",
+          "action": "BUY",
+          "target_assets": [
+            "equity",
+            "cash"
+          ],
+          "allocation_changes": {
+            "cash": -0.0832,
+            "equity": 0.0832
+          },
+          "confidence": 0.758,
+          "request_human_review": false,
+          "reason_codes": [
+            "trend_following",
+            "memory_informed"
+          ],
+          "memories_used": [
+            "persona_trend_mem_outcome_1",
+            "persona_trend_mem_relational_1"
+          ],
+          "expected_behavioral_effect": {
+            "stress_change": -0.001,
+            "confidence_change": 0.001
+          }
+        },
+        {
+          "persona_id": "persona_trend",
+          "scenario_id": "scenario_liquidity",
+          "action": "MOVE_TO_CASH",
+          "target_assets": [
+            "equity",
+            "cash"
+          ],
+          "allocation_changes": {
+            "equity": -0.3,
+            "cash": 0.3
+          },
+          "confidence": 0.662,
+          "request_human_review": false,
+          "reason_codes": [
+            "volatility_aversion",
+            "memory_informed"
+          ],
+          "memories_used": [
+            "persona_trend_mem_outcome_1",
+            "persona_trend_mem_relational_1"
+          ],
+          "expected_behavioral_effect": {
+            "stress_change": 0.03,
+            "confidence_change": -0.02
+          }
+        }
+      ],
+      "portfolios": {
+        "equal_weight": {
+          "portfolio_id": "persona_trend_equal_weight",
+          "weights": {
+            "EQ_AAPL": 0.057647057647057645,
+            "EQ_MSFT": 0.057647057647057645,
+            "EQ_TSLA": 0.057647057647057645,
+            "EQ_JPM": 0.057647057647057645,
+            "EQ_XOM": 0.057647057647057645,
+            "EQ_PG": 0.057647057647057645,
+            "EQ_JNJ": 0.057647057647057645,
+            "ETF_SPY": 0.057647057647057645,
+            "ETF_QQQ": 0.057647057647057645,
+            "ETF_VNQ": 0.057647057647057645,
+            "FI_AGG": 0.057647057647057645,
+            "FI_TLT": 0.057647057647057645,
+            "FI_SHY": 0.057647057647057645,
+            "FI_LQD": 0.057647057647057645,
+            "CM_GLD": 0.057647057647057645,
+            "CM_DBC": 0.057647057647057645,
+            "CM_USO": 0.057647057647057645,
+            "CASH": 0.02000002000002
+          },
+          "constraint_violations": [],
+          "metrics": {
+            "annualized_return": 0.090532,
+            "volatility": 0.056244,
+            "sharpe_ratio": 0.720633,
+            "sortino_ratio": 0.738734,
+            "max_drawdown": -0.04427,
+            "var_95": -0.005724,
+            "cvar_95": -0.006964,
+            "expected_scenario_return": -0.018598,
+            "expected_drawdown": 0.099071,
+            "scenario_survival_rate": 1.0,
+            "liquidity_score": 0.964835,
+            "concentration": 0.056894,
+            "turnover": 0.0,
+            "objective_alignment": 0.444206
+          },
+          "scenario_results": [],
+          "explanation": {
+            "method": "equal_weight",
+            "constraint_adjustments": [
+              "raised cash to minimum 0.020"
+            ]
+          }
+        },
+        "risk_based": {
+          "portfolio_id": "persona_trend_risk_based",
+          "weights": {
+            "EQ_AAPL": 0.03360406720813442,
+            "EQ_MSFT": 0.03592207184414369,
+            "EQ_TSLA": 0.022646045292090584,
+            "EQ_JPM": 0.0347240694481389,
+            "EQ_XOM": 0.03307106614213229,
+            "EQ_PG": 0.054828109656219315,
+            "EQ_JNJ": 0.052086104172208346,
+            "ETF_SPY": 0.04166908333816668,
+            "ETF_QQQ": 0.0347240694481389,
+            "ETF_VNQ": 0.03788107576215152,
+            "FI_AGG": 0.1041732083464167,
+            "FI_TLT": 0.049606099212198426,
+            "FI_SHY": 0.26043252086504176,
+            "FI_LQD": 0.07440914881829765,
+            "CM_GLD": 0.046299092598185196,
+            "CM_DBC": 0.03788107576215152,
+            "CM_USO": 0.026043052086104173,
+            "CASH": 0.020000040000080002
+          },
+          "constraint_violations": [],
+          "metrics": {
+            "annualized_return": 0.067251,
+            "volatility": 0.033916,
+            "sharpe_ratio": 0.508626,
+            "sortino_ratio": 0.52169,
+            "max_drawdown": -0.024058,
+            "var_95": -0.003225,
+            "cvar_95": -0.004075,
+            "expected_scenario_return": -0.008193,
+            "expected_drawdown": 0.071884,
+            "scenario_survival_rate": 1.0,
+            "liquidity_score": 0.965737,
+            "concentration": 0.10666,
+            "turnover": 0.266074,
+            "objective_alignment": 0.475421
+          },
+          "scenario_results": [],
+          "explanation": {
+            "method": "risk_based",
+            "constraint_adjustments": [
+              "raised cash to minimum 0.020"
+            ]
+          }
+        },
+        "persona_rule_based": {
+          "portfolio_id": "persona_trend_persona_rule_based",
+          "weights": {
+            "EQ_AAPL": 0.10258899999999997,
+            "EQ_MSFT": 0.11113799999999997,
+            "EQ_TSLA": 0.048495999999999984,
+            "EQ_JPM": 0.09526099999999997,
+            "EQ_XOM": 0.08890999999999999,
+            "EQ_PG": 0.16670599999999997,
+            "EQ_JNJ": 0.15689999999999998,
+            "FI_AGG": 0.013193999999999997,
+            "FI_TLT": 0.005074999999999999,
+            "FI_SHY": 0.032984999999999993,
+            "FI_LQD": 0.008245999999999998,
+            "CM_GLD": 0.012177999999999996,
+            "CM_DBC": 0.010254999999999998,
+            "CM_USO": 0.005566999999999999,
+            "CASH": 0.14249999999999996
+          },
+          "constraint_violations": [],
+          "metrics": {
+            "annualized_return": 0.082332,
+            "volatility": 0.071897,
+            "sharpe_ratio": 0.449695,
+            "sortino_ratio": 0.456139,
+            "max_drawdown": -0.066844,
+            "var_95": -0.007091,
+            "cvar_95": -0.008856,
+            "expected_scenario_return": -0.034903,
+            "expected_drawdown": 0.156844,
+            "scenario_survival_rate": 1.0,
+            "liquidity_score": 0.981028,
+            "concentration": 0.116563,
+            "turnover": 0.498122,
+            "objective_alignment": 0.39529
+          },
+          "scenario_results": [],
+          "explanation": {
+            "method": "persona_rule_based",
+            "class_targets": {
+              "equity": 0.77,
+              "fixed_income": 0.05949999999999997,
+              "commodity": 0.027999999999999997,
+              "cash": 0.14250000000000002
+            },
+            "constraint_adjustments": []
+          }
+        },
+        "behavioral_scenario": {
+          "portfolio_id": "persona_trend_behavioral_scenario",
+          "weights": {
+            "EQ_AAPL": 0.09793190206809792,
+            "EQ_MSFT": 0.10609289390710608,
+            "EQ_TSLA": 0.04629495370504629,
+            "EQ_JPM": 0.09093690906309093,
+            "EQ_XOM": 0.08487391512608487,
+            "EQ_PG": 0.15913884086115912,
+            "EQ_JNJ": 0.14977785022214976,
+            "FI_AGG": 0.013193986806013193,
+            "FI_TLT": 0.005074994925005074,
+            "FI_SHY": 0.03298496701503298,
+            "FI_LQD": 0.008245991754008244,
+            "CM_GLD": 0.012177987822012177,
+            "CM_DBC": 0.010254989745010254,
+            "CM_USO": 0.005566994433005566,
+            "CASH": 0.17745282254717742
+          },
+          "constraint_violations": [],
+          "metrics": {
+            "annualized_return": 0.079822,
+            "volatility": 0.068647,
+            "sharpe_ratio": 0.434422,
+            "sortino_ratio": 0.440878,
+            "max_drawdown": -0.063701,
+            "var_95": -0.006773,
+            "cvar_95": -0.008453,
+            "expected_scenario_return": -0.033059,
+            "expected_drawdown": 0.14971,
+            "scenario_survival_rate": 1.0,
+            "liquidity_score": 0.981692,
+            "concentration": 0.119351,
+            "turnover": 0.500323,
+            "objective_alignment": 0.400822
+          },
+          "scenario_results": [
+            {
+              "scenario_id": "scenario_bear",
+              "action": "MOVE_TO_CASH",
+              "equity_delta": -0.2199,
+              "probability": 0.2553,
+              "request_human_review": false
+            },
+            {
+              "scenario_id": "scenario_base",
+              "action": "BUY",
+              "equity_delta": 0.0832,
+              "probability": 0.6383,
+              "request_human_review": false
+            },
+            {
+              "scenario_id": "scenario_liquidity",
+              "action": "MOVE_TO_CASH",
+              "equity_delta": -0.3,
+              "probability": 0.1064,
+              "request_human_review": false
+            }
+          ],
+          "explanation": {
+            "persona_id": "persona_trend",
+            "objective": {
+              "primary": "aggressive_growth",
+              "secondary": "momentum_capture"
+            },
+            "scenarios_weighted": [
+              {
+                "scenario_id": "scenario_base",
+                "name": "Base Case",
+                "probability": 0.6383,
+                "regime": "sideways"
+              },
+              {
+                "scenario_id": "scenario_bear",
+                "name": "Bear Market",
+                "probability": 0.2553,
+                "regime": "bear"
+              },
+              {
+                "scenario_id": "scenario_liquidity",
+                "name": "Liquidity Crisis",
+                "probability": 0.1064,
+                "regime": "risk_off"
+              }
+            ],
+            "behavioral_influences": [
+              {
+                "scenario_id": "scenario_bear",
+                "action": "MOVE_TO_CASH",
+                "equity_delta": -0.2199,
+                "probability": 0.2553,
+                "reason_codes": [
+                  "volatility_aversion",
+                  "memory_informed"
+                ],
+                "memories_used": [
+                  "persona_trend_mem_outcome_1",
+                  "persona_trend_mem_relational_1"
+                ]
+              },
+              {
+                "scenario_id": "scenario_base",
+                "action": "BUY",
+                "equity_delta": 0.0832,
+                "probability": 0.6383,
+                "reason_codes": [
+                  "trend_following",
+                  "memory_informed"
+                ],
+                "memories_used": [
+                  "persona_trend_mem_outcome_1",
+                  "persona_trend_mem_relational_1"
+                ]
+              },
+              {
+                "scenario_id": "scenario_liquidity",
+                "action": "MOVE_TO_CASH",
+                "equity_delta": -0.3,
+                "probability": 0.1064,
+                "reason_codes": [
+                  "volatility_aversion",
+                  "memory_informed"
+                ],
+                "memories_used": [
+                  "persona_trend_mem_outcome_1",
+                  "persona_trend_mem_relational_1"
+                ]
+              }
+            ],
+            "memories_used": [
+              "persona_trend_mem_outcome_1",
+              "persona_trend_mem_relational_1"
+            ],
+            "class_targets_before": {
+              "equity": 0.77,
+              "fixed_income": 0.0595,
+              "commodity": 0.028,
+              "cash": 0.1425
+            },
+            "class_targets_after": {
+              "equity": 0.735,
+              "fixed_income": 0.0595,
+              "commodity": 0.028,
+              "cash": 0.1775
+            },
+            "constraint_adjustments": [],
+            "constraint_violations": [],
+            "limited_assets": [],
+            "remaining_risks": [
+              "residual_equity_exposure=0.74 under adverse_scenario_prob=0.36"
+            ],
+            "method": "behavioral_scenario",
+            "equity_tilt": -0.035
+          }
+        }
+      },
+      "behavioral_portfolio_fit": {
+        "persona_adherence": 0.7743,
+        "risk_constraint_adherence": 1.0,
+        "liquidity_adherence": 0.9908,
+        "behavioral_consistency": 0.0817,
+        "scenario_stability": 0.5533,
+        "objective_alignment": 0.4008,
+        "behavioral_portfolio_fit": 0.6775,
+        "violation_penalty": 0.0
+      },
+      "persona_metrics": {
+        "action_entropy": 0.9183,
+        "decision_consistency": 0.0817,
+        "strategy_switch_rate": 1.0,
+        "scenario_sensitivity": 0.165,
+        "memory_influence_score": 0.6667
+      }
+    },
+    {
+      "persona_id": "persona_contrarian",
+      "persona": {
+        "persona_id": "persona_contrarian",
+        "name": "Contrarian Investor",
+        "demographics": {
+          "age_range": "40-54",
+          "occupation_type": "portfolio_manager"
+        },
+        "financial_profile": {
+          "portfolio_value": 1500000,
+          "income_stability": 0.65,
+          "investment_horizon_years": 12,
+          "liquidity_need": 0.2,
+          "financial_literacy": 0.8
+        },
+        "behavioral_traits": {
+          "risk_tolerance": 0.65,
+          "loss_aversion": 0.4,
+          "trend_sensitivity": -0.7,
+          "overconfidence": 0.55,
+          "herding": 0.1,
+          "ambiguity_aversion": 0.35,
+          "need_for_control": 0.6,
+          "advisor_trust": 0.4,
+          "ai_trust": 0.5
+        },
+        "objectives": {
+          "primary": "mean_reversion",
+          "secondary": "long_term_growth"
+        },
+        "constraints": {
+          "minimum_cash_weight": 0.05,
+          "maximum_equity_weight": 0.85,
+          "maximum_single_asset_weight": 0.25,
+          "maximum_expected_drawdown": 0.35,
+          "restricted_assets": []
+        },
+        "dynamic_state": {
+          "stress": 0.2,
+          "confidence": 0.65,
+          "recent_loss": 0.0,
+          "recent_gain": 0.0,
+          "current_strategy": "contrarian"
+        },
+        "memory_config": {
+          "enabled": true,
+          "memory_length": 5,
+          "relevance_weight": 0.3,
+          "recency_weight": 0.2,
+          "importance_weight": 0.2,
+          "emotion_weight": 0.1,
+          "objective_weight": 0.1,
+          "reliability_weight": 0.1
+        }
+      },
+      "decisions": [
+        {
+          "persona_id": "persona_contrarian",
+          "scenario_id": "scenario_bear",
+          "action": "INCREASE_RISK",
+          "target_assets": [
+            "equity",
+            "cash"
+          ],
+          "allocation_changes": {
+            "cash": -0.1576,
+            "equity": 0.1576
+          },
+          "confidence": 0.5655,
+          "request_human_review": false,
+          "reason_codes": [
+            "contrarian_reversion",
+            "volatility_aversion",
+            "memory_informed"
+          ],
+          "memories_used": [
+            "persona_contrarian_mem_outcome_1",
+            "persona_contrarian_mem_relational_1"
+          ],
+          "expected_behavioral_effect": {
+            "stress_change": 0.0225,
+            "confidence_change": -0.015
+          }
+        },
+        {
+          "persona_id": "persona_contrarian",
+          "scenario_id": "scenario_base",
+          "action": "HOLD",
+          "target_assets": [],
+          "allocation_changes": {},
+          "confidence": 0.6465,
+          "request_human_review": false,
+          "reason_codes": [
+            "memory_informed"
+          ],
+          "memories_used": [
+            "persona_contrarian_mem_outcome_1",
+            "persona_contrarian_mem_relational_1"
+          ],
+          "expected_behavioral_effect": {
+            "stress_change": -0.001,
+            "confidence_change": 0.001
+          }
+        },
+        {
+          "persona_id": "persona_contrarian",
+          "scenario_id": "scenario_liquidity",
+          "action": "INCREASE_RISK",
+          "target_assets": [
+            "equity",
+            "cash"
+          ],
+          "allocation_changes": {
+            "cash": -0.1938,
+            "equity": 0.1938
+          },
+          "confidence": 0.5385,
+          "request_human_review": false,
+          "reason_codes": [
+            "contrarian_reversion",
+            "volatility_aversion",
+            "memory_informed"
+          ],
+          "memories_used": [
+            "persona_contrarian_mem_outcome_1",
+            "persona_contrarian_mem_relational_1"
+          ],
+          "expected_behavioral_effect": {
+            "stress_change": 0.03,
+            "confidence_change": -0.02
+          }
+        }
+      ],
+      "portfolios": {
+        "equal_weight": {
+          "portfolio_id": "persona_contrarian_equal_weight",
+          "weights": {
+            "EQ_AAPL": 0.05588233529401177,
+            "EQ_MSFT": 0.05588233529401177,
+            "EQ_TSLA": 0.05588233529401177,
+            "EQ_JPM": 0.05588233529401177,
+            "EQ_XOM": 0.05588233529401177,
+            "EQ_PG": 0.05588233529401177,
+            "EQ_JNJ": 0.05588233529401177,
+            "ETF_SPY": 0.05588233529401177,
+            "ETF_QQQ": 0.05588233529401177,
+            "ETF_VNQ": 0.05588233529401177,
+            "FI_AGG": 0.05588233529401177,
+            "FI_TLT": 0.05588233529401177,
+            "FI_SHY": 0.05588233529401177,
+            "FI_LQD": 0.05588233529401177,
+            "CM_GLD": 0.05588233529401177,
+            "CM_DBC": 0.05588233529401177,
+            "CM_USO": 0.05588233529401177,
+            "CASH": 0.050000300001800016
+          },
+          "constraint_violations": [],
+          "metrics": {
+            "annualized_return": 0.088526,
+            "volatility": 0.054523,
+            "sharpe_ratio": 0.706606,
+            "sortino_ratio": 0.723835,
+            "max_drawdown": -0.042852,
+            "var_95": -0.005545,
+            "cvar_95": -0.006748,
+            "expected_scenario_return": -0.017847,
+            "expected_drawdown": 0.095912,
+            "scenario_survival_rate": 1.0,
+            "liquidity_score": 0.965912,
+            "concentration": 0.055588,
+            "turnover": 0.0,
+            "objective_alignment": 0.464307
+          },
+          "scenario_results": [],
+          "explanation": {
+            "method": "equal_weight",
+            "constraint_adjustments": [
+              "raised cash to minimum 0.050"
+            ]
+          }
+        },
+        "risk_based": {
+          "portfolio_id": "persona_contrarian_risk_based",
+          "weights": {
+            "EQ_AAPL": 0.0330969669030331,
+            "EQ_MSFT": 0.03537896462103538,
+            "EQ_TSLA": 0.02230397769602231,
+            "EQ_JPM": 0.034199965800034204,
+            "EQ_XOM": 0.03257096742903258,
+            "EQ_PG": 0.053999946000054005,
+            "EQ_JNJ": 0.0512999487000513,
+            "ETF_SPY": 0.04103995896004104,
+            "ETF_QQQ": 0.034199965800034204,
+            "ETF_VNQ": 0.03730896269103731,
+            "FI_AGG": 0.1025998974001026,
+            "FI_TLT": 0.04885695114304886,
+            "FI_SHY": 0.2412997587002413,
+            "FI_LQD": 0.07328492671507329,
+            "CM_GLD": 0.045599954400045606,
+            "CM_DBC": 0.03730896269103731,
+            "CM_USO": 0.02564997435002565,
+            "CASH": 0.04999995000005001
+          },
+          "constraint_violations": [],
+          "metrics": {
+            "annualized_return": 0.066583,
+            "volatility": 0.033352,
+            "sharpe_ratio": 0.497218,
+            "sortino_ratio": 0.508332,
+            "max_drawdown": -0.023428,
+            "var_95": -0.00318,
+            "cvar_95": -0.004008,
+            "expected_scenario_return": -0.00807,
+            "expected_drawdown": 0.07037,
+            "scenario_survival_rate": 1.0,
+            "liquidity_score": 0.966711,
+            "concentration": 0.098008,
+            "turnover": 0.249538,
+            "objective_alignment": 0.483859
+          },
+          "scenario_results": [],
+          "explanation": {
+            "method": "risk_based",
+            "constraint_adjustments": [
+              "capped FI_SHY to 0.250",
+              "raised cash to minimum 0.050"
+            ]
+          }
+        },
+        "persona_rule_based": {
+          "portfolio_id": "persona_contrarian_persona_rule_based",
+          "weights": {
+            "EQ_AAPL": 0.08959800000000001,
+            "EQ_MSFT": 0.09706500000000001,
+            "EQ_TSLA": 0.042356000000000005,
+            "EQ_JPM": 0.08319900000000001,
+            "EQ_XOM": 0.07765200000000001,
+            "EQ_PG": 0.14559700000000003,
+            "EQ_JNJ": 0.13703300000000002,
+            "FI_AGG": 0.03725400000000001,
+            "FI_TLT": 0.014328000000000002,
+            "FI_SHY": 0.09313400000000001,
+            "FI_LQD": 0.023284000000000003,
+            "CM_GLD": 0.008481000000000002,
+            "CM_DBC": 0.007142000000000001,
+            "CM_USO": 0.0038770000000000002,
+            "CASH": 0.14000000000000004
+          },
+          "constraint_violations": [],
+          "metrics": {
+            "annualized_return": 0.076085,
+            "volatility": 0.062955,
+            "sharpe_ratio": 0.414339,
+            "sortino_ratio": 0.422432,
+            "max_drawdown": -0.058092,
+            "var_95": -0.006162,
+            "cvar_95": -0.007746,
+            "expected_scenario_return": -0.028935,
+            "expected_drawdown": 0.138845,
+            "scenario_survival_rate": 1.0,
+            "liquidity_score": 0.979378,
+            "concentration": 0.102719,
+            "turnover": 0.422101,
+            "objective_alignment": 0.44213
+          },
+          "scenario_results": [],
+          "explanation": {
+            "method": "persona_rule_based",
+            "class_targets": {
+              "equity": 0.6725000000000001,
+              "fixed_income": 0.1679999999999999,
+              "commodity": 0.0195,
+              "cash": 0.14
+            },
+            "constraint_adjustments": []
+          }
+        },
+        "behavioral_scenario": {
+          "portfolio_id": "persona_contrarian_behavioral_scenario",
+          "weights": {
+            "EQ_AAPL": 0.097706,
+            "EQ_MSFT": 0.105849,
+            "EQ_TSLA": 0.046188,
+            "EQ_JPM": 0.090727,
+            "EQ_XOM": 0.084679,
+            "EQ_PG": 0.158773,
+            "EQ_JNJ": 0.149433,
+            "FI_AGG": 0.037254,
+            "FI_TLT": 0.014328,
+            "FI_SHY": 0.093134,
+            "FI_LQD": 0.023284,
+            "CM_GLD": 0.008481,
+            "CM_DBC": 0.007142,
+            "CM_USO": 0.003877,
+            "CASH": 0.079145
+          },
+          "constraint_violations": [],
+          "metrics": {
+            "annualized_return": 0.080471,
+            "volatility": 0.06861,
+            "sharpe_ratio": 0.444121,
+            "sortino_ratio": 0.452917,
+            "max_drawdown": -0.063586,
+            "var_95": -0.00673,
+            "cvar_95": -0.008445,
+            "expected_scenario_return": -0.032145,
+            "expected_drawdown": 0.151266,
+            "scenario_survival_rate": 1.0,
+            "liquidity_score": 0.978221,
+            "concentration": 0.103036,
+            "turnover": 0.418269,
+            "objective_alignment": 0.435709
+          },
+          "scenario_results": [
+            {
+              "scenario_id": "scenario_bear",
+              "action": "INCREASE_RISK",
+              "equity_delta": 0.1576,
+              "probability": 0.2553,
+              "request_human_review": false
+            },
+            {
+              "scenario_id": "scenario_base",
+              "action": "HOLD",
+              "equity_delta": 0.0,
+              "probability": 0.6383,
+              "request_human_review": false
+            },
+            {
+              "scenario_id": "scenario_liquidity",
+              "action": "INCREASE_RISK",
+              "equity_delta": 0.1938,
+              "probability": 0.1064,
+              "request_human_review": false
+            }
+          ],
+          "explanation": {
+            "persona_id": "persona_contrarian",
+            "objective": {
+              "primary": "mean_reversion",
+              "secondary": "long_term_growth"
+            },
+            "scenarios_weighted": [
+              {
+                "scenario_id": "scenario_base",
+                "name": "Base Case",
+                "probability": 0.6383,
+                "regime": "sideways"
+              },
+              {
+                "scenario_id": "scenario_bear",
+                "name": "Bear Market",
+                "probability": 0.2553,
+                "regime": "bear"
+              },
+              {
+                "scenario_id": "scenario_liquidity",
+                "name": "Liquidity Crisis",
+                "probability": 0.1064,
+                "regime": "risk_off"
+              }
+            ],
+            "behavioral_influences": [
+              {
+                "scenario_id": "scenario_bear",
+                "action": "INCREASE_RISK",
+                "equity_delta": 0.1576,
+                "probability": 0.2553,
+                "reason_codes": [
+                  "contrarian_reversion",
+                  "volatility_aversion",
+                  "memory_informed"
+                ],
+                "memories_used": [
+                  "persona_contrarian_mem_outcome_1",
+                  "persona_contrarian_mem_relational_1"
+                ]
+              },
+              {
+                "scenario_id": "scenario_base",
+                "action": "HOLD",
+                "equity_delta": 0.0,
+                "probability": 0.6383,
+                "reason_codes": [
+                  "memory_informed"
+                ],
+                "memories_used": [
+                  "persona_contrarian_mem_outcome_1",
+                  "persona_contrarian_mem_relational_1"
+                ]
+              },
+              {
+                "scenario_id": "scenario_liquidity",
+                "action": "INCREASE_RISK",
+                "equity_delta": 0.1938,
+                "probability": 0.1064,
+                "reason_codes": [
+                  "contrarian_reversion",
+                  "volatility_aversion",
+                  "memory_informed"
+                ],
+                "memories_used": [
+                  "persona_contrarian_mem_outcome_1",
+                  "persona_contrarian_mem_relational_1"
+                ]
+              }
+            ],
+            "memories_used": [
+              "persona_contrarian_mem_outcome_1",
+              "persona_contrarian_mem_relational_1"
+            ],
+            "class_targets_before": {
+              "equity": 0.6725,
+              "fixed_income": 0.168,
+              "commodity": 0.0195,
+              "cash": 0.14
+            },
+            "class_targets_after": {
+              "equity": 0.7334,
+              "fixed_income": 0.168,
+              "commodity": 0.0195,
+              "cash": 0.0791
+            },
+            "constraint_adjustments": [],
+            "constraint_violations": [],
+            "limited_assets": [],
+            "remaining_risks": [
+              "residual_equity_exposure=0.73 under adverse_scenario_prob=0.36"
+            ],
+            "method": "behavioral_scenario",
+            "equity_tilt": 0.0609
+          }
+        }
+      },
+      "behavioral_portfolio_fit": {
+        "persona_adherence": 0.8295,
+        "risk_constraint_adherence": 1.0,
+        "liquidity_adherence": 0.9891,
+        "behavioral_consistency": 0.0817,
+        "scenario_stability": 0.5565,
+        "objective_alignment": 0.4357,
+        "behavioral_portfolio_fit": 0.695,
+        "violation_penalty": 0.0
+      },
+      "persona_metrics": {
+        "action_entropy": 0.9183,
+        "decision_consistency": 0.0817,
+        "strategy_switch_rate": 1.0,
+        "scenario_sensitivity": 0.0841,
+        "memory_influence_score": 0.6667
+      }
+    }
+  ],
+  "behavioral_separation": {
+    "mean_pairwise_distance": 0.5957084438688202,
+    "classification_accuracy": 0.7777777777777778,
+    "random_baseline": 0.3333333333333333
+  },
+  "aggregate": {
+    "risk_violation_rate": 0.0,
+    "num_personas": 3,
+    "num_scenarios": 3
+  }
+}

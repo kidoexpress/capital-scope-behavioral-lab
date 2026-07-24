@@ -24,6 +24,11 @@ paper_trading/portfolios_state.json
 paper_trading/paper_trading.db
 paper_trading/paper_trading.db-*
 
+# Python caches / Synthetic Portfolio Lab outputs
+__pycache__/
+*.pyc
+synthetic_portfolio_lab/_experiments_output/
+
 # Behavioral Lab runtime state / experiment outputs
 src/behavioral-lab/**/*.local.*
 behavioral_lab_data/
