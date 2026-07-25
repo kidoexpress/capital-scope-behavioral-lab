@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import numpy as np
 
+from .. import SCORING_VERSION
 from ..quiz.items import CORE_ITEMS_BY_ID
 from ..quiz.scenarios import SCENARIOS_BY_ID
 from ..schemas.enums import (
@@ -182,7 +183,8 @@ def compute_scores(
     conf, low_dims = profile_confidence(scores, consistency)
 
     return {
-        "scoring_version": w.version,
+        "scoring_version": SCORING_VERSION,
+        "risk_formula_version": w.version,
         "dimension_scores": {d: vars(s) for d, s in scores.items()},
         "big_five_scores": group(BIG_FIVE),
         "financial_behavior_scores": group(FINANCIAL_BEHAVIOR_DIMS),
