@@ -26,7 +26,7 @@ const CORE_NAV: NavItem[] = [
   { path: '/scenarios',     icon: Zap,          label: 'Scenarios'   },
   { path: '/watchlist',     icon: Star,         label: 'Watchlist'   },
   { path: '/paper-trading', icon: WalletCards,  label: 'Paper Trade' },
-  { path: '/synthetic-portfolio-lab', icon: Sparkles, label: 'Synthetic Lab' },
+  { path: '/synthetic-lab', icon: Sparkles, label: 'Synthetic Lab' },
 ];
 
 const AI_NAV: NavItem[] = [

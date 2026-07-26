@@ -1,0 +1,39 @@
+/* Responsive rules for the Financial Twin Lab shell (media queries only). */
+
+.stlab-shell {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px 32px 96px;
+  box-sizing: border-box;
+}
+
+.stlab-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.stlab-stepper-wrap {
+  margin-bottom: 32px;
+}
+
+.stlab-content {
+  min-height: 340px;
+}
+
+/* Stepper: full on >=768, compact below */
+.stlab-stepper-compact { display: none; }
+
+@media (max-width: 767px) {
+  .stlab-shell { padding: 16px 16px 96px; }
+  .stlab-stepper-full { display: none !important; }
+  .stlab-stepper-compact { display: flex !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stlab-shell * { scroll-behavior: auto; }
+}

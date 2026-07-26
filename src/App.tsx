@@ -18,6 +18,7 @@ const StockResearch = lazy(() => import('./pages/StockResearch'));
 const GoldMiningScanner = lazy(() => import('./pages/GoldMiningScanner'));
 const PaperTrading = lazy(() => import('./pages/PaperTrading'));
 const SyntheticPortfolioLab = lazy(() => import('./pages/SyntheticPortfolioLab'));
+const SyntheticLab = lazy(() => import('./pages/SyntheticLab'));
 
 function RouteFallback() {
   return (
@@ -48,6 +49,10 @@ export default function App() {
           <Route path="scenarios"  element={page(<ScenarioSimulator />)} />
           <Route path="watchlist"  element={page(<Watchlist />)} />
           <Route path="paper-trading" element={page(<PaperTrading />)} />
+          {/* New guided Financial Twin flow */}
+          <Route path="synthetic-lab" element={page(<SyntheticLab />)} />
+          <Route path="synthetic-lab/:step" element={page(<SyntheticLab />)} />
+          {/* Legacy single-page lab kept reachable until the new flow reaches parity */}
           <Route path="synthetic-portfolio-lab" element={page(<SyntheticPortfolioLab />)} />
           {/* AI Agents */}
           <Route path="agents/earnings" element={page(<EarningsReviewer />)} />
