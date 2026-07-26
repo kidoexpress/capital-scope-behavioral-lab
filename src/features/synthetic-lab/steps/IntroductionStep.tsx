@@ -1,5 +1,6 @@
 import { Activity, BarChart3, Brain, Clock, ShieldCheck } from 'lucide-react';
-import { color, radius, space, tint, type as t } from '../tokens';
+import { color, radius, space, type as t } from '../tokens';
+import { Button } from '../components/ui';
 
 interface Props {
   onPrimary: () => void;
@@ -29,15 +30,15 @@ export default function IntroductionStep({ onPrimary, onDemo }: Props) {
         goals and behavior.
       </p>
 
-      <div style={{ display: 'grid', gap: space.sm, marginTop: space.xl }}>
+      <div style={{ display: 'grid', gap: space.md, marginTop: space.xl }}>
         {BENEFITS.map(({ icon: Icon, text }) => (
           <div key={text} style={{ display: 'flex', alignItems: 'center', gap: space.md }}>
             <span style={{
-              width: 36, height: 36, borderRadius: radius.sm, flexShrink: 0, display: 'inline-flex',
-              alignItems: 'center', justifyContent: 'center', background: tint(color.accent, 12),
-              border: `1px solid ${tint(color.accent, 30)}`, color: color.accent,
+              width: 38, height: 38, borderRadius: radius.sm, flexShrink: 0, display: 'inline-flex',
+              alignItems: 'center', justifyContent: 'center', background: color.raised,
+              border: `1px solid ${color.borderSub}`, color: color.accent,
             }}>
-              <Icon size={18} aria-hidden />
+              <Icon size={18} aria-hidden strokeWidth={1.75} />
             </span>
             <span style={{ fontSize: t.body, color: color.textHi }}>{text}</span>
           </div>
@@ -47,33 +48,15 @@ export default function IntroductionStep({ onPrimary, onDemo }: Props) {
       <ul style={{ listStyle: 'none', margin: `${space.xl}px 0 0`, padding: 0, display: 'grid', gap: space.sm }}>
         {INFO.map(({ icon: Icon, text }) => (
           <li key={text} style={{ display: 'flex', alignItems: 'flex-start', gap: space.sm, fontSize: t.support + 1, color: color.textLo }}>
-            <Icon size={15} aria-hidden style={{ flexShrink: 0, marginTop: 1 }} />
+            <Icon size={15} aria-hidden strokeWidth={1.75} style={{ flexShrink: 0, marginTop: 1 }} />
             <span>{text}</span>
           </li>
         ))}
       </ul>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: space.sm, marginTop: space.xxl }}>
-        <button
-          type="button"
-          onClick={onPrimary}
-          style={{
-            height: 46, padding: '0 22px', borderRadius: radius.md, border: 'none', cursor: 'pointer',
-            background: color.accent, color: '#fff', fontSize: t.body, fontWeight: 700,
-          }}
-        >
-          Create my Financial Twin
-        </button>
-        <button
-          type="button"
-          onClick={onDemo}
-          style={{
-            height: 46, padding: '0 22px', borderRadius: radius.md, cursor: 'pointer',
-            background: 'transparent', border: `1px solid ${color.borderSoft}`, color: color.textMid, fontSize: t.body, fontWeight: 600,
-          }}
-        >
-          Use a demo profile
-        </button>
+        <Button onClick={onPrimary}>Create my Financial Twin</Button>
+        <Button variant="ghost" onClick={onDemo}>Use a demo profile</Button>
       </div>
     </div>
   );

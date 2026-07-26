@@ -6,6 +6,9 @@ import InlineDisclaimer from './components/InlineDisclaimer';
 import AdvancedSettingsDrawer from './components/AdvancedSettingsDrawer';
 import IntroductionStep from './steps/IntroductionStep';
 import PlaceholderStep from './steps/PlaceholderStep';
+import FinancialProfileStep from './steps/FinancialProfileStep';
+import BehaviorQuizStep from './steps/BehaviorQuizStep';
+import DecisionScenariosStep from './steps/DecisionScenariosStep';
 import { nextStep, prevStep, type StepId } from './config/steps';
 import type { LabDraftApi } from './state/useLabDraft';
 
@@ -39,17 +42,11 @@ export default function SyntheticLabShell({ currentStep, maxReachedIndex, draftA
           />
         );
       case 'profile':
-        return <PlaceholderStep title="Financial profile" phase="Phase 3"
-          description="Tell us about your goals, horizon, capital, liquidity and constraints — in short blocks."
-          onBack={goBack} onContinue={goNext} />;
+        return <FinancialProfileStep draftApi={draftApi} onBack={goBack} onContinue={goNext} />;
       case 'quiz':
-        return <PlaceholderStep title="Behavior quiz" phase="Phase 3"
-          description="A few questions, one at a time, about how you handle risk, losses and discipline."
-          onBack={goBack} onContinue={goNext} />;
+        return <BehaviorQuizStep draftApi={draftApi} onBack={goBack} onContinue={goNext} />;
       case 'scenarios':
-        return <PlaceholderStep title="Decision scenarios" phase="Phase 3"
-          description="Concrete market situations. Choose what you would most likely do, and how confident you are."
-          onBack={goBack} onContinue={goNext} continueLabel="See my twin" />;
+        return <DecisionScenariosStep draftApi={draftApi} onBack={goBack} onContinue={goNext} />;
       case 'twin':
         return <PlaceholderStep title="Your Financial Twin" phase="Phase 4"
           description="A behavioral estimate based on your financial context, quiz answers and scenario decisions."
