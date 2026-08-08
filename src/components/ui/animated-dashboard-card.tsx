@@ -1,6 +1,14 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
+
+/**
+ * NOTE ON SPACING: this project's `src/index.css` declares `* { margin:0; padding:0 }`
+ * outside any cascade layer, which beats Tailwind v4's layered utilities. Tailwind
+ * spacing classes (px-*, mb-*, gap-*) therefore do nothing here, so all spacing in
+ * this component is set with inline styles.
+ */
 
 interface FinanceImpactCardProps {
   title?: string;
@@ -12,28 +20,24 @@ interface FinanceImpactCardProps {
   secondaryDelta?: string;
   totalLabel?: string;
   currency?: string;
-  borderColor?: string;
-  backgroundColor?: string;
-  outerDotsCount?: number;
-  innerDotsCount?: number;
   enableAnimations?: boolean;
   onMoreDetails?: () => void;
 }
+
+const RISK = "#7da7ff";
+const OFFSET = "#55d99a";
+const MONO = "JetBrains Mono, monospace";
 
 const defaultProps: Partial<FinanceImpactCardProps> = {
   title: "Portfolio Exposure",
   primaryLabel: "Risk Capital",
   secondaryLabel: "Hedge Offset",
-  primaryValue: 1250,
-  secondaryValue: 875,
-  primaryDelta: "-12.4%",
-  secondaryDelta: "+4.8%",
+  primaryValue: 0,
+  secondaryValue: 0,
+  primaryDelta: "0.00%",
+  secondaryDelta: "No explicit hedge",
   totalLabel: "NET IMPACT",
   currency: "$",
-  borderColor: "border-white/5",
-  backgroundColor: "bg-white/[0.03]",
-  outerDotsCount: 48,
-  innerDotsCount: 36,
   enableAnimations: true,
 };
 
@@ -47,194 +51,243 @@ function formatMoney(value: number, currency: string) {
   return `${value < 0 ? "-" : ""}${currency}${formatted}`;
 }
 
+const eyebrow: CSSProperties = {
+  fontSize: 11, fontWeight: 600, letterSpacing: "0.14em",
+  textTransform: "uppercase", color: "rgba(255,255,255,0.40)",
+};
+const truncate: CSSProperties = {
+  minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+};
+
 export function FinanceImpactCard(props: FinanceImpactCardProps) {
   const {
-    title,
-    primaryLabel,
-    secondaryLabel,
-    primaryValue,
-    secondaryValue,
-    primaryDelta,
-    secondaryDelta,
-    totalLabel,
-    currency,
-    borderColor,
-    backgroundColor,
-    outerDotsCount,
-    innerDotsCount,
-    enableAnimations,
-    onMoreDetails,
+    title, primaryLabel, secondaryLabel, primaryValue, secondaryValue,
+    primaryDelta, secondaryDelta, totalLabel, currency, enableAnimations, onMoreDetails,
   } = { ...defaultProps, ...props };
 
   const shouldReduceMotion = useReducedMotion();
   const shouldAnimate = enableAnimations && !shouldReduceMotion;
 
-  const generateDots = (count: number, radius: number, centerX: number, centerY: number) => {
-    const dots = [];
-    for (let i = 0; i < count; i++) {
-      const angle = (i / count) * 2 * Math.PI;
-      const x = Math.round((centerX + radius * Math.cos(angle)) * 1000) / 1000;
-      const y = Math.round((centerY + radius * Math.sin(angle)) * 1000) / 1000;
-      dots.push({ x, y, delay: i * 0.018 });
-    }
-    return dots;
-  };
-
-  const outerDots = generateDots(outerDotsCount!, 185, 203, 200);
-  const innerDots = generateDots(innerDotsCount!, 155, 203, 200);
+  const risk = Math.abs(primaryValue!);
+  const offset = Math.abs(secondaryValue!);
+  const gross = risk + offset;
   const netValue = primaryValue! + secondaryValue!;
+  const hasExposure = gross > 0;
+
+  // The ring encodes the real split between shock and hedge, so the legend colours
+  // below describe the data instead of being decoration.
+  const riskPct = hasExposure ? (risk / gross) * 100 : 0;
+  const offsetPct = hasExposure ? (offset / gross) * 100 : 0;
+  // Share of the shock actually neutralised by hedges — the number that matters.
+  const coverage = risk > 0 ? Math.min(offset / risk, 1) : 0;
+
+  const GAP = 1.6; // separation between arcs, in pathLength units
+  const arc = (pct: number) => Math.max(0, pct - GAP);
 
   const containerVariants: Variants = {
     hidden: { opacity: 0, y: 18, scale: 0.97 },
     visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 30,
-        staggerChildren: 0.06,
-        delayChildren: 0.08,
-      },
+      opacity: 1, y: 0, scale: 1,
+      transition: { type: "spring", stiffness: 300, damping: 30, staggerChildren: 0.06, delayChildren: 0.08 },
     },
   };
 
-  const dotVariants: Variants = {
-    hidden: { opacity: 0, scale: 0 },
-    visible: {
-      opacity: 0.5,
-      scale: 1,
-      transition: { duration: 0.5, ease: "easeOut" },
-    },
-  };
+  const legend = [
+    { label: primaryLabel!, value: primaryValue!, delta: primaryDelta!, color: RISK, pct: riskPct },
+    { label: secondaryLabel!, value: secondaryValue!, delta: secondaryDelta!, color: OFFSET, pct: offsetPct },
+  ];
 
   return (
     <motion.div
-      className="w-full"
+      style={{ width: "100%" }}
       initial={shouldAnimate ? "hidden" : "visible"}
       animate="visible"
       variants={shouldAnimate ? containerVariants : undefined}
     >
-      <motion.div
-        className={`${backgroundColor} ${borderColor} relative overflow-hidden rounded-[28px] border shadow-[0_24px_80px_rgba(0,0,0,0.32)]`}
+      <div
+        style={{
+          position: "relative", overflow: "hidden", borderRadius: 28,
+          border: "1px solid rgba(255,255,255,0.05)",
+          background: "rgba(255,255,255,0.03)",
+          boxShadow: "0 24px 80px rgba(0,0,0,0.32)",
+          height: "100%",
+        }}
       >
-        <div className="relative overflow-hidden px-5 pb-5 pt-7">
-          <div className="absolute inset-0 rounded-[28px] bg-[radial-gradient(circle_at_50%_10%,rgba(138,164,255,0.11),transparent_38%),linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.012))]" />
-
-          <div className="relative z-10 mb-2 flex items-center justify-between">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/36">{title}</span>
-            <span className="rounded-full border border-white/7 bg-white/[0.04] px-2.5 py-1 text-[11px] font-medium text-white/48">Scenario</span>
-          </div>
-
-          <div className="relative z-10 mx-auto h-[17.5rem] w-[17.5rem] max-w-full">
-            <svg className="h-full w-full" viewBox="0 0 448 448" aria-hidden="true">
-              {outerDots.map((dot, index) => (
-                <motion.circle
-                  key={`outer-${index}`}
-                  cx={dot.x}
-                  cy={dot.y}
-                  r="9"
-                  fill="currentColor"
-                  style={{ color: "#7da7ff" }}
-                  variants={shouldAnimate ? dotVariants : undefined}
-                  initial="hidden"
-                  animate="visible"
-                />
-              ))}
-              {innerDots.map((dot, index) => (
-                <motion.circle
-                  key={`inner-${index}`}
-                  cx={dot.x}
-                  cy={dot.y}
-                  r="9"
-                  fill="currentColor"
-                  style={{ color: "#55d99a" }}
-                  variants={shouldAnimate ? dotVariants : undefined}
-                  initial="hidden"
-                  animate="visible"
-                />
-              ))}
-            </svg>
-
-            <div className="pointer-events-none absolute inset-0 -mt-8 flex items-center justify-center">
-              <div className="text-center">
-                <motion.div
-                  className="mb-2 text-lg font-semibold text-white/58"
-                  initial={shouldAnimate ? { opacity: 0, y: -8, scale: 0.96 } : undefined}
-                  animate={shouldAnimate ? { opacity: 1, y: 0, scale: 1 } : undefined}
-                  transition={{ delay: 0.25, type: "spring", stiffness: 380, damping: 25 }}
-                >
-                  {totalLabel}
-                </motion.div>
-                <motion.div
-                  className={`text-4xl font-bold tracking-[-0.05em] ${netValue >= 0 ? "text-emerald-200" : "text-rose-200"}`}
-                  initial={shouldAnimate ? { opacity: 0, y: 16, scale: 0.86, filter: "blur(4px)" } : undefined}
-                  animate={shouldAnimate ? { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" } : undefined}
-                  transition={{ delay: 0.38, type: "spring", stiffness: 300, damping: 28 }}
-                >
-                  {formatMoney(netValue, currency!)}
-                </motion.div>
-              </div>
-            </div>
-          </div>
-
+        <div style={{ position: "relative", padding: "22px 20px 20px" }}>
           <div
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-48 rounded-[28px]"
             style={{
+              position: "absolute", inset: 0, borderRadius: 28, pointerEvents: "none",
               background:
-                "linear-gradient(to bottom, transparent 0%, transparent 36%, rgba(7,9,13,0.72) 48%, rgba(7,9,13,0.92) 62%, rgba(7,9,13,1) 76%)",
-              zIndex: 5,
+                "radial-gradient(circle at 50% 8%, rgba(138,164,255,0.10), transparent 42%)," +
+                "linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))",
             }}
           />
 
-          <div className="relative z-10 -mt-14 px-1 pb-1 pt-4">
-            <div className="mb-4 grid grid-cols-2 gap-5">
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2">
-                  <motion.div className="h-4 w-0.5 rounded-full bg-[#7da7ff]" initial={shouldAnimate ? { opacity: 0, scaleY: 0 } : undefined} animate={shouldAnimate ? { opacity: 1, scaleY: 1 } : undefined} transition={{ delay: 0.35, type: "spring" }} />
-                  <motion.div className="text-sm font-medium text-white/48" initial={shouldAnimate ? { opacity: 0, y: 12 } : undefined} animate={shouldAnimate ? { opacity: 1, y: 0 } : undefined} transition={{ delay: 0.42 }}>
-                    {primaryLabel}
-                  </motion.div>
-                </div>
-                <motion.div className="text-xl font-bold text-white" initial={shouldAnimate ? { opacity: 0, y: -8 } : undefined} animate={shouldAnimate ? { opacity: 1, y: 0 } : undefined} transition={{ delay: 0.5 }}>
-                  {formatMoney(primaryValue!, currency!)}
-                </motion.div>
-                <motion.div className="text-xs font-semibold text-[#7da7ff]" initial={shouldAnimate ? { opacity: 0, y: -8 } : undefined} animate={shouldAnimate ? { opacity: 1, y: 0 } : undefined} transition={{ delay: 0.58 }}>
-                  {primaryDelta}
-                </motion.div>
-              </div>
+          {/* header */}
+          <div style={{
+            position: "relative", zIndex: 1, display: "flex", alignItems: "center",
+            justifyContent: "space-between", gap: 12, marginBottom: 20,
+          }}>
+            <span style={{ ...eyebrow, ...truncate }}>{title}</span>
+            <span style={{
+              flexShrink: 0, borderRadius: 999, padding: "4px 10px", fontSize: 10, fontWeight: 500,
+              border: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.04)",
+              color: "rgba(255,255,255,0.45)",
+            }}>
+              Scenario
+            </span>
+          </div>
 
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2">
-                  <motion.div className="h-4 w-0.5 rounded-full bg-[#55d99a]" initial={shouldAnimate ? { opacity: 0, scaleY: 0 } : undefined} animate={shouldAnimate ? { opacity: 1, scaleY: 1 } : undefined} transition={{ delay: 0.65, type: "spring" }} />
-                  <motion.div className="text-sm font-medium text-white/48" initial={shouldAnimate ? { opacity: 0, y: 12 } : undefined} animate={shouldAnimate ? { opacity: 1, y: 0 } : undefined} transition={{ delay: 0.72 }}>
-                    {secondaryLabel}
-                  </motion.div>
-                </div>
-                <motion.div className="text-xl font-bold text-white" initial={shouldAnimate ? { opacity: 0, y: -8 } : undefined} animate={shouldAnimate ? { opacity: 1, y: 0 } : undefined} transition={{ delay: 0.8 }}>
-                  {formatMoney(secondaryValue!, currency!)}
+          {/* gauge — fluid, so it scales with the column instead of overflowing */}
+          <div style={{
+            position: "relative", zIndex: 1, width: "100%", maxWidth: 232,
+            margin: "0 auto", aspectRatio: "1 / 1",
+          }}>
+            <svg viewBox="0 0 200 200" aria-hidden="true"
+              style={{ width: "100%", height: "100%", transform: "rotate(-90deg)" }}>
+              <circle cx="100" cy="100" r="86" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="10" />
+              {hasExposure && (
+                <>
+                  <motion.circle
+                    cx="100" cy="100" r="86" fill="none" pathLength={100}
+                    stroke={RISK} strokeWidth="10" strokeLinecap="round"
+                    initial={shouldAnimate ? { strokeDasharray: "0 100" } : { strokeDasharray: `${arc(riskPct)} 100` }}
+                    animate={{ strokeDasharray: `${arc(riskPct)} 100` }}
+                    transition={{ delay: 0.15, duration: 0.85, ease: [0.2, 0.8, 0.2, 1] }}
+                  />
+                  <motion.circle
+                    cx="100" cy="100" r="86" fill="none" pathLength={100}
+                    stroke={OFFSET} strokeWidth="10" strokeLinecap="round"
+                    strokeDashoffset={-riskPct}
+                    initial={shouldAnimate ? { strokeDasharray: "0 100" } : { strokeDasharray: `${arc(offsetPct)} 100` }}
+                    animate={{ strokeDasharray: `${arc(offsetPct)} 100` }}
+                    transition={{ delay: 0.35, duration: 0.85, ease: [0.2, 0.8, 0.2, 1] }}
+                  />
+                </>
+              )}
+            </svg>
+
+            <div style={{
+              position: "absolute", inset: 0, display: "flex", flexDirection: "column",
+              alignItems: "center", justifyContent: "center", padding: "0 26px", textAlign: "center",
+            }}>
+              {hasExposure ? (
+                <>
+                  <motion.span
+                    style={{ ...eyebrow, fontSize: 10, letterSpacing: "0.16em", color: "rgba(255,255,255,0.45)" }}
+                    initial={shouldAnimate ? { opacity: 0, y: -6 } : undefined}
+                    animate={shouldAnimate ? { opacity: 1, y: 0 } : undefined}
+                    transition={{ delay: 0.3 }}
+                  >
+                    {totalLabel}
+                  </motion.span>
+                  <motion.span
+                    style={{
+                      marginTop: 6, fontFamily: MONO, fontSize: 32, fontWeight: 700,
+                      lineHeight: 1, letterSpacing: "-0.04em",
+                      color: netValue >= 0 ? "#a7f3d0" : "#fecdd3",
+                    }}
+                    initial={shouldAnimate ? { opacity: 0, y: 10, filter: "blur(4px)" } : undefined}
+                    animate={shouldAnimate ? { opacity: 1, y: 0, filter: "blur(0px)" } : undefined}
+                    transition={{ delay: 0.42, type: "spring", stiffness: 300, damping: 28 }}
+                  >
+                    {formatMoney(netValue, currency!)}
+                  </motion.span>
+                  {risk > 0 && (
+                    <motion.span
+                      style={{ marginTop: 8, fontSize: 11, lineHeight: 1.3, color: "rgba(255,255,255,0.40)" }}
+                      initial={shouldAnimate ? { opacity: 0 } : undefined}
+                      animate={shouldAnimate ? { opacity: 1 } : undefined}
+                      transition={{ delay: 0.6 }}
+                    >
+                      {(coverage * 100).toFixed(0)}% of the shock offset
+                    </motion.span>
+                  )}
+                </>
+              ) : (
+                /* honest empty state — a giant $0 inside a ring reads as a broken value */
+                <>
+                  <span style={{ ...eyebrow, fontSize: 10, letterSpacing: "0.16em", color: "rgba(255,255,255,0.35)" }}>
+                    {totalLabel}
+                  </span>
+                  <span style={{
+                    marginTop: 6, fontFamily: MONO, fontSize: 28, fontWeight: 700,
+                    lineHeight: 1, color: "rgba(255,255,255,0.30)",
+                  }}>
+                    —
+                  </span>
+                  <span style={{ marginTop: 10, fontSize: 11, lineHeight: 1.4, color: "rgba(255,255,255,0.35)" }}>
+                    No exposure modelled yet
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* legend + values */}
+          <div style={{ position: "relative", zIndex: 1, marginTop: 22 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
+              {legend.map((item, i) => (
+                <motion.div
+                  key={item.label}
+                  style={{
+                    minWidth: 0, borderRadius: 16, padding: "10px 12px",
+                    border: "1px solid rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.02)",
+                  }}
+                  initial={shouldAnimate ? { opacity: 0, y: 10 } : undefined}
+                  animate={shouldAnimate ? { opacity: 1, y: 0 } : undefined}
+                  transition={{ delay: 0.5 + i * 0.08 }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                    <span style={{ width: 2, height: 12, flexShrink: 0, borderRadius: 999, background: item.color }} />
+                    <span style={{ ...truncate, fontSize: 11, fontWeight: 500, color: "rgba(255,255,255,0.45)" }}>
+                      {item.label}
+                    </span>
+                    {hasExposure && (
+                      <span style={{
+                        marginLeft: "auto", flexShrink: 0, fontFamily: MONO,
+                        fontSize: 10, color: "rgba(255,255,255,0.30)",
+                      }}>
+                        {item.pct.toFixed(0)}%
+                      </span>
+                    )}
+                  </div>
+                  <div style={{
+                    marginTop: 7, fontFamily: MONO, fontSize: 18, fontWeight: 700,
+                    lineHeight: 1, color: "#fff",
+                  }}>
+                    {formatMoney(item.value, currency!)}
+                  </div>
+                  <div style={{ ...truncate, marginTop: 7, fontSize: 11, fontWeight: 600, color: item.color }}
+                    title={item.delta}>
+                    {item.delta}
+                  </div>
                 </motion.div>
-                <motion.div className="text-xs font-semibold text-[#55d99a]" initial={shouldAnimate ? { opacity: 0, y: -8 } : undefined} animate={shouldAnimate ? { opacity: 1, y: 0 } : undefined} transition={{ delay: 0.88 }}>
-                  {secondaryDelta}
-                </motion.div>
-              </div>
+              ))}
             </div>
 
             <motion.button
-              className="w-full rounded-2xl border border-white/8 bg-white/[0.035] px-4 py-3 text-sm font-semibold text-white/78 shadow-sm transition-colors hover:bg-white/[0.07]"
-              initial={shouldAnimate ? { opacity: 0, y: 14 } : undefined}
+              type="button"
+              style={{
+                width: "100%", borderRadius: 16, padding: "12px 16px", cursor: "pointer",
+                fontSize: 13.5, fontWeight: 600,
+                border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.035)",
+                color: "rgba(255,255,255,0.75)", transition: "background-color 160ms ease",
+              }}
+              initial={shouldAnimate ? { opacity: 0, y: 12 } : undefined}
               animate={shouldAnimate ? { opacity: 1, y: 0 } : undefined}
-              transition={{ delay: 0.96 }}
+              transition={{ delay: 0.7 }}
               whileHover={shouldAnimate ? { scale: 1.012 } : undefined}
               whileTap={shouldAnimate ? { scale: 0.985 } : undefined}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.07)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.035)"; }}
               onClick={onMoreDetails}
             >
               View Exposure Details
             </motion.button>
           </div>
         </div>
-      </motion.div>
+      </div>
     </motion.div>
   );
 }
