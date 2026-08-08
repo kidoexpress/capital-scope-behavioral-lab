@@ -8,7 +8,7 @@ import {
   FlaskConical, Zap, Star,
   FileText, BarChart2, Calculator,
   TerminalSquare,
-  BookOpen, ScanSearch, Home, WalletCards, Sparkles,
+  BookOpen, ScanSearch, Home, WalletCards, Sparkles, Landmark,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -27,6 +27,7 @@ const CORE_NAV: NavItem[] = [
   { path: '/watchlist',     icon: Star,         label: 'Watchlist'   },
   { path: '/paper-trading', icon: WalletCards,  label: 'Paper Trade' },
   { path: '/synthetic-lab', icon: Sparkles, label: 'Synthetic Lab' },
+  { path: '/public-portfolios', icon: Landmark, label: 'Public Books' },
 ];
 
 const AI_NAV: NavItem[] = [

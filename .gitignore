@@ -50,3 +50,4 @@ experiments_output/
 # Financial Twin outputs
 financial_twin_lab/_twins_output/
 *.twin.json
+public_portfolios/_cache/
