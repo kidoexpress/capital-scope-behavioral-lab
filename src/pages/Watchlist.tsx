@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Activity,
   ArrowDownRight,
@@ -133,8 +133,22 @@ export default function Watchlist() {
               <RefreshCw size={14} className={refreshing ? 'animate-spin' : ''} />
             </button>
           </div>
-          <div className="sentiment-gauge" style={{ '--score': sentiment.score } as CSSProperties}>
-            <i />
+          <div
+            className={`sentiment-gauge ${sentiment.tone}`}
+            role="img"
+            aria-label={`Market mood score ${sentiment.score} of 100 — ${sentiment.label}`}
+          >
+            <svg viewBox="0 0 158 158" aria-hidden="true">
+              <circle className="gauge-track" cx="79" cy="79" r="70" />
+              <circle
+                className="gauge-fill"
+                cx="79"
+                cy="79"
+                r="70"
+                strokeDasharray={2 * Math.PI * 70}
+                strokeDashoffset={2 * Math.PI * 70 * (1 - sentiment.score / 100)}
+              />
+            </svg>
             <span>{sentiment.score}</span>
           </div>
           <div className="breadth-row">
