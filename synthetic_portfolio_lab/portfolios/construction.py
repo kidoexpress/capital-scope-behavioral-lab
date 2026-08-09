@@ -13,6 +13,8 @@ from ..behavior.agent import PersonaAgent
 from ..explanations.builder import build_explanation
 from ..memory.retrieval import MemoryStore
 from ..optimization.constraints import apply_constraints
+from ..optimization.covariance import estimate_covariance, risk_contributions
+from ..optimization.risk_budget import equal_risk_contribution
 from ..schemas.models import Asset, BehavioralDecision, Persona, PortfolioCandidate, Scenario
 
 CLASSES = ("equity", "fixed_income", "commodity", "cash")
@@ -27,11 +29,26 @@ def _group_by_class(assets: list[Asset]) -> dict[str, list[Asset]]:
 
 
 def _inverse_vol_weights(assets: list[Asset]) -> dict[str, float]:
+    """Correlation-blind fallback, kept for degenerate cases (0 or 1 asset)."""
     if not assets:
         return {}
     inv = np.array([1.0 / max(a.volatility, 1e-3) for a in assets])
     inv = inv / inv.sum()
     return {a.asset_id: float(w) for a, w in zip(assets, inv)}
+
+
+def _erc_weights(assets: list[Asset]) -> dict[str, float]:
+    """Equal risk contribution within a group, accounting for correlation.
+
+    Inverse-volatility would size two assets correlated at 0.95 as though they
+    were independent diversifiers; this sizes them by the risk they add to the
+    group. Falls back to inverse-vol when there is nothing to diversify.
+    """
+    if len(assets) < 2:
+        return _inverse_vol_weights(assets)
+    ids, sigma, _meta = estimate_covariance(assets)
+    w, _info = equal_risk_contribution(sigma)
+    return {aid: float(x) for aid, x in zip(ids, w)}
 
 
 def _distribute_class_targets(
@@ -43,7 +60,7 @@ def _distribute_class_targets(
         members = groups.get(klass, [])
         if not members or target <= 0:
             continue
-        within = _inverse_vol_weights(members)
+        within = _erc_weights(members)
         for aid, w in within.items():
             weights[aid] = weights.get(aid, 0.0) + target * w
     return weights
@@ -96,6 +113,38 @@ def risk_based(persona: Persona, assets: list[Asset], assets_by_id: dict[str, As
         persona_id=persona.persona_id, method="risk_based",
         weights=weights, constraint_violations=viol,
         explanation={"method": "risk_based", "constraint_adjustments": adj},
+    )
+
+
+def risk_parity(persona: Persona, assets: list[Asset], assets_by_id: dict[str, Asset]) -> PortfolioCandidate:
+    """Equal risk contribution across the whole risky sleeve.
+
+    Unlike ``risk_based`` (which ranks assets by a standalone risk_score) this
+    equalises each position's share of *portfolio* variance, so correlated
+    positions are jointly downweighted rather than double-counted.
+    """
+    risky = [a for a in assets if a.asset_class != "cash"]
+    if len(risky) < 2:
+        w = _inverse_vol_weights(risky)
+        diagnostics: dict = {}
+    else:
+        ids, sigma, meta = estimate_covariance(risky)
+        raw, info = equal_risk_contribution(sigma)
+        w = {aid: float(x) for aid, x in zip(ids, raw)}
+        diagnostics = {
+            "covariance": meta,
+            "solver": info,
+            "risk_contributions": {
+                aid: round(float(rc), 6)
+                for aid, rc in zip(ids, risk_contributions(raw, sigma))
+            },
+        }
+    weights, viol, adj = apply_constraints(w, persona, assets_by_id)
+    return PortfolioCandidate(
+        portfolio_id=f"{persona.persona_id}_risk_parity",
+        persona_id=persona.persona_id, method="risk_parity",
+        weights=weights, constraint_violations=viol,
+        explanation={"method": "risk_parity", "constraint_adjustments": adj, **diagnostics},
     )
 
 

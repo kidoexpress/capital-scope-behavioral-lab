@@ -6,6 +6,8 @@ import InlineDisclaimer from './components/InlineDisclaimer';
 import AdvancedSettingsDrawer from './components/AdvancedSettingsDrawer';
 import IntroductionStep from './steps/IntroductionStep';
 import PlaceholderStep from './steps/PlaceholderStep';
+import TwinStep from './steps/TwinStep';
+import PortfolioStep from './steps/PortfolioStep';
 import FinancialProfileStep from './steps/FinancialProfileStep';
 import BehaviorQuizStep from './steps/BehaviorQuizStep';
 import DecisionScenariosStep from './steps/DecisionScenariosStep';
@@ -48,13 +50,9 @@ export default function SyntheticLabShell({ currentStep, maxReachedIndex, draftA
       case 'scenarios':
         return <DecisionScenariosStep draftApi={draftApi} onBack={goBack} onContinue={goNext} />;
       case 'twin':
-        return <PlaceholderStep title="Your Financial Twin" phase="Phase 4"
-          description="A behavioral estimate based on your financial context, quiz answers and scenario decisions."
-          onBack={goBack} onContinue={goNext} continueLabel="Build my portfolio" />;
+        return <TwinStep draft={draftApi.draft} onBack={goBack} onContinue={goNext} />;
       case 'portfolio':
-        return <PlaceholderStep title="Your portfolio" phase="Phase 5"
-          description="An allocation that seeks growth while reducing the chance you abandon it under stress."
-          onBack={goBack} onContinue={goNext} continueLabel="Simulate future outcomes" />;
+        return <PortfolioStep draft={draftApi.draft} onBack={goBack} onContinue={goNext} />;
       case 'forecast':
         return <PlaceholderStep title="Future simulation" phase="Phase 6"
           description="A range of possible outcomes for 3, 6 and 12 months — never a single guaranteed line."

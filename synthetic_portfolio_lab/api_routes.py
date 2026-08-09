@@ -5,14 +5,30 @@ market data. Mounted under /api/synthetic-portfolio by main.py.
 """
 from __future__ import annotations
 
+from dataclasses import asdict
+
+import numpy as np
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from .assets.universe import build_universe, universe_by_id
+from .behavior.agent import RuleBasedPersonaAgent
+from .evaluation.portfolio_metrics import evaluate_portfolio
 from .experiments.config import ExperimentConfig
 from .experiments.runner import run_experiment
 from .explanations.suggestion import build_suggestion
+from .memory.retrieval import MemoryStore, seed_memories
+from .optimization.covariance import (
+    diversification_ratio,
+    estimate_covariance,
+    portfolio_volatility,
+    risk_contributions,
+)
+from .personas.from_answers import persona_from_answers
 from .personas.templates import PERSONA_TEMPLATES, get_persona
-from .scenarios.templates import SCENARIO_TEMPLATES, get_scenario
+from .portfolios.construction import behavioral_scenario, equal_weight
+from .scenarios.templates import SCENARIO_TEMPLATES, all_scenarios, get_scenario
+from .scenarios.engine import normalize_probabilities
 
 router = APIRouter(prefix="/synthetic-portfolio", tags=["synthetic-portfolio-lab"])
 
@@ -60,4 +76,95 @@ def run(req: RunRequest):
         "behavioral_separation": result["behavioral_separation"],
         "aggregate": result["aggregate"],
         "suggestions": suggestions,
+    }
+
+
+class ScenarioAnswer(BaseModel):
+    choice: str = ""
+    confidence: float = 50.0
+
+
+class TwinRequest(BaseModel):
+    """The guided flow's draft: what the user actually answered."""
+    profile: dict[str, object] = Field(default_factory=dict)
+    quiz: dict[str, float] = Field(default_factory=dict)
+    scenarios: dict[str, ScenarioAnswer] = Field(default_factory=dict)
+    seed: int = 42
+    use_memory: bool = True
+    universe_seed: int = 12345
+    universe_days: int = 756
+
+
+@router.post("/twin")
+def twin(req: TwinRequest):
+    """Derive a persona from the user's own answers and build their portfolio.
+
+    ``/run`` can only score personas from the fixed template list, so the guided
+    flow's answers previously had no path into the engine. This endpoint maps
+    them to a Persona, runs the same deterministic construction pipeline, and
+    returns the allocation together with the audit trail behind it.
+    """
+    answers = {
+        "profile": req.profile,
+        "quiz": req.quiz,
+        "scenarios": {k: v.model_dump() for k, v in req.scenarios.items()},
+    }
+    persona, provenance = persona_from_answers(answers)
+
+    assets = build_universe(req.universe_seed, req.universe_days)
+    abyid = universe_by_id(assets)
+    scenarios = normalize_probabilities(all_scenarios())
+    agent = RuleBasedPersonaAgent()
+    store = MemoryStore(seed_memories(persona) if req.use_memory else [])
+
+    candidate = behavioral_scenario(persona, assets, abyid, scenarios, agent, store, None)
+    baseline = equal_weight(persona, assets, abyid).weights
+    metrics = evaluate_portfolio(candidate.weights, abyid, scenarios, persona, baseline=baseline)
+
+    # Risk decomposition of the final weights — what each position actually
+    # contributes to portfolio risk, rather than how big it looks.
+    held = [abyid[aid] for aid in candidate.weights if aid in abyid]
+    ids, sigma, cov_meta = estimate_covariance(held)
+    w = np.array([candidate.weights.get(aid, 0.0) for aid in ids], dtype=float)
+    if w.sum() > 0:
+        w = w / w.sum()
+    rc = risk_contributions(w, sigma)
+
+    allocation = [
+        {
+            "asset_id": aid,
+            "symbol": abyid[aid].symbol if aid in abyid else aid,
+            "asset_class": abyid[aid].asset_class if aid in abyid else "cash",
+            "sector": abyid[aid].sector if aid in abyid else "cash",
+            "weight": round(float(candidate.weights.get(aid, 0.0)), 6),
+            "risk_contribution": round(float(x), 6),
+        }
+        for aid, x in zip(ids, rc)
+    ]
+    allocation.sort(key=lambda r: r["weight"], reverse=True)
+
+    return {
+        "twin": {
+            "persona_id": persona.persona_id,
+            "name": persona.name,
+            "behavioral_traits": asdict(persona.behavioral_traits),
+            "financial_profile": asdict(persona.financial_profile),
+            "constraints": asdict(persona.constraints),
+            "objectives": asdict(persona.objectives),
+            "provenance": provenance,
+        },
+        "portfolio": {
+            "method": candidate.method,
+            "allocation": allocation,
+            "constraint_violations": candidate.constraint_violations,
+            "scenario_results": candidate.scenario_results,
+            "explanation": candidate.explanation,
+            "metrics": {k: round(float(v), 6) for k, v in metrics.items()},
+            "risk": {
+                "portfolio_volatility": round(portfolio_volatility(w, sigma), 6),
+                "diversification_ratio": round(diversification_ratio(w, sigma), 4),
+                "covariance": cov_meta,
+            },
+        },
+        "disclaimer": "Simulated results on a synthetic universe. Not investment advice.",
     }

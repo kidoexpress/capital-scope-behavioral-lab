@@ -99,3 +99,75 @@ export function assetLabel(assetId: string): string {
   const parts = assetId.split('_');
   return parts.length > 1 ? parts.slice(1).join('_') : assetId;
 }
+
+// ─────────────── Financial Twin (guided flow) ───────────────
+
+export interface TwinAllocationRow {
+  asset_id: string;
+  symbol: string;
+  asset_class: string;
+  sector: string;
+  weight: number;
+  risk_contribution: number;
+}
+
+export interface TwinResponse {
+  twin: {
+    persona_id: string;
+    name: string;
+    behavioral_traits: Record<string, number>;
+    financial_profile: Record<string, number>;
+    constraints: {
+      minimum_cash_weight: number;
+      maximum_equity_weight: number;
+      maximum_single_asset_weight: number;
+      maximum_expected_drawdown: number;
+      restricted_assets: string[];
+    };
+    objectives: { primary: string; secondary: string };
+    provenance: {
+      missing: string[];
+      notes: string[];
+      answered: { quiz: number; scenarios: number; profile: number };
+      drivers: Record<string, string[]>;
+    };
+  };
+  portfolio: {
+    method: string;
+    allocation: TwinAllocationRow[];
+    constraint_violations: string[];
+    explanation: Record<string, unknown>;
+    metrics: Record<string, number>;
+    risk: {
+      portfolio_volatility: number;
+      diversification_ratio: number;
+      covariance: { observations: number; shrinkage: number; average_correlation?: number; synthesized: string[] };
+    };
+  };
+  disclaimer: string;
+}
+
+export interface TwinParams {
+  profile: Record<string, string | number>;
+  quiz: Record<string, number>;
+  scenarios: Record<string, { choice: string; confidence: number }>;
+  seed?: number;
+  use_memory?: boolean;
+}
+
+export async function fetchTwin(params: TwinParams): Promise<TwinResponse> {
+  const res = await fetch(`${BASE}/twin`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params),
+  });
+  if (!res.ok) {
+    let detail = `twin request failed (${res.status})`;
+    try {
+      const body = await res.json();
+      if (body?.detail) detail = String(body.detail);
+    } catch { /* keep the status-based message */ }
+    throw new Error(detail);
+  }
+  return res.json();
+}
