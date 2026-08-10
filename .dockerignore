@@ -1,0 +1,19 @@
+# Keep the Docker build context small — the backend image only needs
+# requirements.txt, main.py, and the three package dirs COPY'd in Dockerfile.
+node_modules
+dist
+dist-ssr
+src
+public
+docs
+tests
+.git
+.vercel
+*.md
+__pycache__
+*.pyc
+.pytest_cache
+financial_twin_lab
+public_portfolios/_cache
+paper_trading/*.db
+paper_trading/*.json
