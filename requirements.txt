@@ -1,8 +1,8 @@
+# Vercel reads ONLY this root-level requirements.txt for the api/ Python
+# function (a requirements.txt placed next to the function file is ignored —
+# confirmed by testing, see git log). Kept deliberately minimal to fit
+# Vercel's function size limit: see api/index.py for exactly which routes run
+# here and why. Railway's Dockerfile uses requirements-full.txt instead.
 fastapi>=0.115.0
-uvicorn[standard]>=0.30.0
-pandas>=2.2.0
 numpy>=1.26.0
-scipy>=1.12.0
-yfinance>=0.2.50
-pytest>=8.2.0
 httpx>=0.27.0

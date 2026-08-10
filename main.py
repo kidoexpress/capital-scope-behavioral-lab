@@ -14,7 +14,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from paper_trading import router as paper_trading_router
+from paper_trading.routes import router as paper_trading_router
 from paper_trading.proxy import proxy_router
 from synthetic_portfolio_lab.api_routes import router as synthetic_portfolio_router
 from public_portfolios.api_routes import router as public_portfolios_router
