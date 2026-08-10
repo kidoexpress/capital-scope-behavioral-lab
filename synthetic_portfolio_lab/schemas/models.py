@@ -24,6 +24,8 @@ class Asset:
     maximum_weight: float = 1.0
     allowed_personas: list[str] = field(default_factory=list)  # empty = all
     historical_series: list[float] = field(default_factory=list)  # daily returns
+    name: str = ""                  # full instrument/company name, e.g. "Apple Inc."
+    country: str = ""               # domicile/listing country; "" for cash
 
 
 # ─────────────────────────── Personas ───────────────────────────

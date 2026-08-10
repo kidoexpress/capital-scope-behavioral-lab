@@ -105,8 +105,11 @@ export function assetLabel(assetId: string): string {
 export interface TwinAllocationRow {
   asset_id: string;
   symbol: string;
+  name: string;
   asset_class: string;
   sector: string;
+  /** Domicile/listing country of the instrument; '' for cash (no domicile). */
+  country: string;
   weight: number;
   risk_contribution: number;
 }
@@ -135,6 +138,8 @@ export interface TwinResponse {
   portfolio: {
     method: string;
     allocation: TwinAllocationRow[];
+    /** Weight by domicile country, normalized over invested (non-cash) weight. */
+    country_weights: Record<string, number>;
     constraint_violations: string[];
     explanation: Record<string, unknown>;
     metrics: Record<string, number>;

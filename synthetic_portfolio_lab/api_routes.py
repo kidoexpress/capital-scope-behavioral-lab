@@ -145,14 +145,30 @@ def twin(req: TwinRequest):
         {
             "asset_id": aid,
             "symbol": abyid[aid].symbol if aid in abyid else aid,
+            "name": abyid[aid].name if aid in abyid else aid,
             "asset_class": abyid[aid].asset_class if aid in abyid else "cash",
             "sector": abyid[aid].sector if aid in abyid else "cash",
+            "country": abyid[aid].country if aid in abyid else "",
             "weight": round(float(candidate.weights.get(aid, 0.0)), 6),
             "risk_contribution": round(float(x), 6),
         }
         for aid, x in zip(ids, rc)
     ]
     allocation.sort(key=lambda r: r["weight"], reverse=True)
+
+    # Country breakdown excludes cash (it has no domicile) and is normalized over
+    # the remaining weight, so it reads as "of what's actually invested" rather
+    # than being diluted by however much sits in cash.
+    invested = sum(r["weight"] for r in allocation if r["country"])
+    country_breakdown: dict[str, float] = {}
+    for r in allocation:
+        if not r["country"]:
+            continue
+        country_breakdown[r["country"]] = country_breakdown.get(r["country"], 0.0) + r["weight"]
+    country_weights = (
+        {c: round(w / invested, 6) for c, w in sorted(country_breakdown.items(), key=lambda kv: -kv[1])}
+        if invested > 0 else {}
+    )
 
     return {
         "twin": {
@@ -167,6 +183,7 @@ def twin(req: TwinRequest):
         "portfolio": {
             "method": candidate.method,
             "allocation": allocation,
+            "country_weights": country_weights,
             "constraint_violations": candidate.constraint_violations,
             "scenario_results": candidate.scenario_results,
             "explanation": candidate.explanation,

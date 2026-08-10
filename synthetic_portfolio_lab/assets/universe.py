@@ -13,25 +13,52 @@ from ..schemas.models import Asset
 
 TRADING_DAYS = 252
 
-# (asset_id, symbol, asset_class, exp_return, volatility, liquidity, risk, sector)
+# (asset_id, symbol, asset_class, exp_return, volatility, liquidity, risk, sector,
+#  name, country)
+#
+# name/country identify the real-world instrument each synthetic asset stands in
+# for (return SERIES are still simulated, not fetched — see the module docstring).
+# Every instrument here happens to be US-domiciled/listed, including the "global"
+# commodity ETFs (GLD, DBC, USO are US-registered trusts/funds even though gold and
+# oil are globally traded) — this MVP universe has no non-US exposure. That is a
+# real, disclosable limitation, not something to paper over with invented foreign
+# holdings, so callers should surface it rather than infer diversification that
+# isn't there.
 _BASE = [
-    ("EQ_AAPL", "AAPL", "equity", 0.12, 0.26, 0.99, 0.62, "technology"),
-    ("EQ_MSFT", "MSFT", "equity", 0.11, 0.24, 0.99, 0.58, "technology"),
-    ("EQ_TSLA", "TSLA", "equity", 0.18, 0.55, 0.97, 0.92, "technology"),
-    ("EQ_JPM", "JPM", "equity", 0.09, 0.28, 0.98, 0.60, "financials"),
-    ("EQ_XOM", "XOM", "equity", 0.08, 0.30, 0.97, 0.63, "energy"),
-    ("EQ_PG", "PG", "equity", 0.07, 0.16, 0.98, 0.38, "consumer_staples"),
-    ("EQ_JNJ", "JNJ", "equity", 0.07, 0.17, 0.98, 0.40, "healthcare"),
-    ("ETF_SPY", "SPY", "etf", 0.09, 0.18, 1.00, 0.50, "broad_market"),
-    ("ETF_QQQ", "QQQ", "etf", 0.12, 0.23, 1.00, 0.60, "technology"),
-    ("ETF_VNQ", "VNQ", "etf", 0.07, 0.21, 0.95, 0.55, "real_estate"),
-    ("FI_AGG", "AGG", "fixed_income", 0.035, 0.05, 0.96, 0.20, "aggregate_bonds"),
-    ("FI_TLT", "TLT", "fixed_income", 0.03, 0.13, 0.95, 0.42, "long_treasury"),
-    ("FI_SHY", "SHY", "fixed_income", 0.025, 0.02, 0.97, 0.08, "short_treasury"),
-    ("FI_LQD", "LQD", "fixed_income", 0.04, 0.08, 0.94, 0.28, "corporate_bonds"),
-    ("CM_GLD", "GLD", "commodity", 0.05, 0.16, 0.96, 0.45, "gold"),
-    ("CM_DBC", "DBC", "commodity", 0.05, 0.19, 0.90, 0.55, "commodities"),
-    ("CM_USO", "USO", "commodity", 0.04, 0.35, 0.90, 0.80, "oil"),
+    ("EQ_AAPL", "AAPL", "equity", 0.12, 0.26, 0.99, 0.62, "technology",
+     "Apple Inc.", "United States"),
+    ("EQ_MSFT", "MSFT", "equity", 0.11, 0.24, 0.99, 0.58, "technology",
+     "Microsoft Corporation", "United States"),
+    ("EQ_TSLA", "TSLA", "equity", 0.18, 0.55, 0.97, 0.92, "technology",
+     "Tesla, Inc.", "United States"),
+    ("EQ_JPM", "JPM", "equity", 0.09, 0.28, 0.98, 0.60, "financials",
+     "JPMorgan Chase & Co.", "United States"),
+    ("EQ_XOM", "XOM", "equity", 0.08, 0.30, 0.97, 0.63, "energy",
+     "Exxon Mobil Corporation", "United States"),
+    ("EQ_PG", "PG", "equity", 0.07, 0.16, 0.98, 0.38, "consumer_staples",
+     "Procter & Gamble Co.", "United States"),
+    ("EQ_JNJ", "JNJ", "equity", 0.07, 0.17, 0.98, 0.40, "healthcare",
+     "Johnson & Johnson", "United States"),
+    ("ETF_SPY", "SPY", "etf", 0.09, 0.18, 1.00, 0.50, "broad_market",
+     "SPDR S&P 500 ETF Trust", "United States"),
+    ("ETF_QQQ", "QQQ", "etf", 0.12, 0.23, 1.00, 0.60, "technology",
+     "Invesco QQQ Trust", "United States"),
+    ("ETF_VNQ", "VNQ", "etf", 0.07, 0.21, 0.95, 0.55, "real_estate",
+     "Vanguard Real Estate ETF", "United States"),
+    ("FI_AGG", "AGG", "fixed_income", 0.035, 0.05, 0.96, 0.20, "aggregate_bonds",
+     "iShares Core U.S. Aggregate Bond ETF", "United States"),
+    ("FI_TLT", "TLT", "fixed_income", 0.03, 0.13, 0.95, 0.42, "long_treasury",
+     "iShares 20+ Year Treasury Bond ETF", "United States"),
+    ("FI_SHY", "SHY", "fixed_income", 0.025, 0.02, 0.97, 0.08, "short_treasury",
+     "iShares 1-3 Year Treasury Bond ETF", "United States"),
+    ("FI_LQD", "LQD", "fixed_income", 0.04, 0.08, 0.94, 0.28, "corporate_bonds",
+     "iShares iBoxx $ Investment Grade Corporate Bond ETF", "United States"),
+    ("CM_GLD", "GLD", "commodity", 0.05, 0.16, 0.96, 0.45, "gold",
+     "SPDR Gold Shares", "United States"),
+    ("CM_DBC", "DBC", "commodity", 0.05, 0.19, 0.90, 0.55, "commodities",
+     "Invesco DB Commodity Index Tracking Fund", "United States"),
+    ("CM_USO", "USO", "commodity", 0.04, 0.35, 0.90, 0.80, "oil",
+     "United States Oil Fund, LP", "United States"),
 ]
 
 
@@ -83,7 +110,7 @@ def _simulate_universe_series(days: int, seed: int) -> dict[str, list[float]]:
     sector_factors = {s: rng.standard_normal(days) for s in sectors}
 
     series: dict[str, list[float]] = {}
-    for aid, _sym, _klass, exp_return, volatility, _liq, _risk, sector in _BASE:
+    for aid, _sym, _klass, exp_return, volatility, _liq, _risk, sector, _name, _country in _BASE:
         b_mkt, b_rates, b_cmdty, b_sector = _LOADINGS[aid]
         systematic = b_mkt ** 2 + b_rates ** 2 + b_cmdty ** 2 + b_sector ** 2
         if systematic > 1.0:  # keep the decomposition a valid variance split
@@ -112,7 +139,7 @@ def build_universe(seed: int = 12345, days: int = 3 * TRADING_DAYS, include_cash
     """Return the controlled universe with deterministic historical series."""
     assets: list[Asset] = []
     series_by_id = _simulate_universe_series(days, seed)
-    for i, (aid, sym, klass, ret, vol, liq, risk, sector) in enumerate(_BASE):
+    for i, (aid, sym, klass, ret, vol, liq, risk, sector, name, country) in enumerate(_BASE):
         assets.append(
             Asset(
                 asset_id=aid,
@@ -128,6 +155,8 @@ def build_universe(seed: int = 12345, days: int = 3 * TRADING_DAYS, include_cash
                 maximum_weight=0.35,
                 allowed_personas=[],
                 historical_series=series_by_id[aid],
+                name=name,
+                country=country,
             )
         )
     if include_cash:
@@ -146,6 +175,8 @@ def build_universe(seed: int = 12345, days: int = 3 * TRADING_DAYS, include_cash
                 maximum_weight=1.0,
                 allowed_personas=[],
                 historical_series=[0.025 / TRADING_DAYS] * days,
+                name="Cash (USD)",
+                country="",
             )
         )
     return assets

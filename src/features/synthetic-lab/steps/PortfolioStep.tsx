@@ -21,6 +21,18 @@ const CLASS_LABEL: Record<string, string> = {
   cash: 'Cash',
 };
 
+/** Flags for the countries this universe can actually produce; '🌐' covers
+ *  anything unlisted rather than silently showing nothing. */
+const COUNTRY_FLAG: Record<string, string> = {
+  'United States': '🇺🇸',
+  Brazil: '🇧🇷',
+  'United Kingdom': '🇬🇧',
+  Germany: '🇩🇪',
+  France: '🇫🇷',
+  Japan: '🇯🇵',
+  'Hong Kong': '🇭🇰',
+};
+
 const pct = (x: number, digits = 1) => `${(x * 100).toFixed(digits)}%`;
 
 function AllocationRow({ row, max }: { row: TwinAllocationRow; max: number }) {
@@ -28,14 +40,30 @@ function AllocationRow({ row, max }: { row: TwinAllocationRow; max: number }) {
   const rPct = max > 0 ? (row.risk_contribution / max) * 100 : 0;
   return (
     <div style={{
-      display: 'grid', gridTemplateColumns: 'minmax(96px, 1.1fr) 2fr minmax(64px, auto) minmax(64px, auto)',
+      display: 'grid', gridTemplateColumns: 'minmax(150px, 1.6fr) 2fr minmax(64px, auto) minmax(64px, auto)',
       gap: space.md, alignItems: 'center', padding: `${space.sm + 2}px 0`,
       borderBottom: `1px solid ${color.borderSub}`,
     }}>
       <div style={{ minWidth: 0 }}>
-        <div style={{ color: color.textHi, fontSize: t.support + 1, fontWeight: 700 }}>{row.symbol}</div>
-        <div style={{ color: color.textLo, fontSize: t.support - 1 }}>
-          {CLASS_LABEL[row.asset_class] ?? row.asset_class}
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+          <span style={{ color: color.textHi, fontSize: t.support + 1, fontWeight: 700 }}>{row.symbol}</span>
+          <span style={{
+            color: color.textLo, fontSize: t.support - 1, overflow: 'hidden',
+            textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>
+            {row.name}
+          </span>
+        </div>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 5, marginTop: 2, minWidth: 0,
+          color: color.textLo, fontSize: t.support - 2,
+          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+        }}>
+          {row.country && <span aria-hidden style={{ flexShrink: 0 }}>{COUNTRY_FLAG[row.country] ?? '🌐'}</span>}
+          <span>
+            {row.country || CLASS_LABEL[row.asset_class] || row.asset_class}
+            {row.country && ` · ${CLASS_LABEL[row.asset_class] ?? row.asset_class}`}
+          </span>
         </div>
       </div>
 
@@ -73,7 +101,7 @@ export default function PortfolioStep({ draft, onBack, onContinue }: Props) {
       {error && !loading && <EngineError message={error} onRetry={reload} />}
 
       {data && !loading && !error && (() => {
-        const { allocation, risk, metrics, constraint_violations: violations } = data.portfolio;
+        const { allocation, country_weights: countryWeights, risk, metrics, constraint_violations: violations } = data.portfolio;
         const rows = allocation.filter((r) => r.weight > 0.0005);
         const max = Math.max(...rows.map((r) => Math.max(r.weight, r.risk_contribution)), 0.0001);
 
@@ -81,6 +109,9 @@ export default function PortfolioStep({ draft, onBack, onContinue }: Props) {
           acc[r.asset_class] = (acc[r.asset_class] ?? 0) + r.weight;
           return acc;
         }, {});
+
+        const countries = Object.entries(countryWeights ?? {}).sort((a, b) => b[1] - a[1]);
+        const singleCountry = countries.length === 1;
 
         const headline = [
           { label: 'Expected volatility', value: pct(risk.portfolio_volatility), hint: 'annualized' },
@@ -109,18 +140,53 @@ export default function PortfolioStep({ draft, onBack, onContinue }: Props) {
               ))}
             </div>
 
-            <div style={{
-              display: 'flex', flexWrap: 'wrap', gap: space.sm, marginBottom: space.lg,
-            }}>
-              {Object.entries(byClass).sort((a, b) => b[1] - a[1]).map(([klass, w]) => (
-                <span key={klass} style={{
-                  padding: '5px 11px', borderRadius: 999, fontSize: t.support - 1,
-                  border: `1px solid ${color.borderSub}`, background: color.raised, color: color.textMid,
-                }}>
-                  {CLASS_LABEL[klass] ?? klass} <strong style={{ color: color.textHi }}>{pct(w, 0)}</strong>
-                </span>
-              ))}
+            <div style={{ marginBottom: space.md }}>
+              <div style={{
+                color: color.textLo, fontSize: t.support - 2, fontWeight: 600,
+                letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: space.xs,
+              }}>
+                Asset class
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: space.sm }}>
+                {Object.entries(byClass).sort((a, b) => b[1] - a[1]).map(([klass, w]) => (
+                  <span key={klass} style={{
+                    padding: '5px 11px', borderRadius: 999, fontSize: t.support - 1,
+                    border: `1px solid ${color.borderSub}`, background: color.raised, color: color.textMid,
+                  }}>
+                    {CLASS_LABEL[klass] ?? klass} <strong style={{ color: color.textHi }}>{pct(w, 0)}</strong>
+                  </span>
+                ))}
+              </div>
             </div>
+
+            {countries.length > 0 && (
+              <div style={{ marginBottom: space.lg }}>
+                <div style={{
+                  color: color.textLo, fontSize: t.support - 2, fontWeight: 600,
+                  letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: space.xs,
+                }}>
+                  Country · of invested assets, cash excluded
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: space.sm, marginBottom: singleCountry ? space.sm : 0 }}>
+                  {countries.map(([countryName, w]) => (
+                    <span key={countryName} style={{
+                      padding: '5px 11px', borderRadius: 999, fontSize: t.support - 1,
+                      border: `1px solid ${color.borderSub}`, background: color.raised, color: color.textMid,
+                      display: 'inline-flex', alignItems: 'center', gap: 6,
+                    }}>
+                      <span aria-hidden>{COUNTRY_FLAG[countryName] ?? '🌐'}</span>
+                      {countryName} <strong style={{ color: color.textHi }}>{pct(w, 0)}</strong>
+                    </span>
+                  ))}
+                </div>
+                {singleCountry && (
+                  <p style={{ color: color.textLo, fontSize: t.support - 1, lineHeight: 1.5, margin: 0 }}>
+                    Every holding here is listed in {countries[0][0]} — this MVP's simulated universe has no
+                    non-US instruments yet, so there is no real geographic diversification to show.
+                  </p>
+                )}
+              </div>
+            )}
 
             <section style={{
               padding: space.lg, borderRadius: radius.lg,
