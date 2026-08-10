@@ -171,3 +171,48 @@ export async function fetchTwin(params: TwinParams): Promise<TwinResponse> {
   }
   return res.json();
 }
+
+// ─────────────── Portfolio forecast (fan chart) ───────────────
+
+export interface ForecastCheckpoint {
+  day: number;
+  months: number;
+  p05: number;
+  p25: number;
+  p50: number;
+  p75: number;
+  p95: number;
+  expected_return: number;
+  downside_probability: number;
+}
+
+export interface ForecastResponse {
+  method: string;
+  forecast: {
+    method: string;
+    observations: number;
+    paths_simulated: number;
+    assumptions: string[];
+    checkpoints: ForecastCheckpoint[];
+    horizons: { '3m': ForecastCheckpoint; '6m': ForecastCheckpoint; '12m': ForecastCheckpoint };
+  };
+  portfolio_value: number;
+  disclaimer: string;
+}
+
+export async function fetchForecast(params: TwinParams): Promise<ForecastResponse> {
+  const res = await fetch(`${BASE}/forecast`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params),
+  });
+  if (!res.ok) {
+    let detail = `forecast request failed (${res.status})`;
+    try {
+      const body = await res.json();
+      if (body?.detail) detail = String(body.detail);
+    } catch { /* keep the status-based message */ }
+    throw new Error(detail);
+  }
+  return res.json();
+}

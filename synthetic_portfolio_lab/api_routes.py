@@ -24,6 +24,7 @@ from .optimization.covariance import (
     portfolio_volatility,
     risk_contributions,
 )
+from .forecasting.portfolio_forecast import forecast_portfolio
 from .personas.from_answers import persona_from_answers
 from .personas.templates import PERSONA_TEMPLATES, get_persona
 from .portfolios.construction import behavioral_scenario, equal_weight
@@ -95,14 +96,11 @@ class TwinRequest(BaseModel):
     universe_days: int = 756
 
 
-@router.post("/twin")
-def twin(req: TwinRequest):
-    """Derive a persona from the user's own answers and build their portfolio.
+def _build_persona_and_portfolio(req: TwinRequest):
+    """Shared by /twin and /forecast: same answers, same seed -> same portfolio.
 
-    ``/run`` can only score personas from the fixed template list, so the guided
-    flow's answers previously had no path into the engine. This endpoint maps
-    them to a Persona, runs the same deterministic construction pipeline, and
-    returns the allocation together with the audit trail behind it.
+    Both endpoints must agree on exactly this pipeline, or the allocation shown
+    on the Portfolio step could silently differ from the one being forecast.
     """
     answers = {
         "profile": req.profile,
@@ -118,6 +116,19 @@ def twin(req: TwinRequest):
     store = MemoryStore(seed_memories(persona) if req.use_memory else [])
 
     candidate = behavioral_scenario(persona, assets, abyid, scenarios, agent, store, None)
+    return persona, provenance, assets, abyid, scenarios, candidate
+
+
+@router.post("/twin")
+def twin(req: TwinRequest):
+    """Derive a persona from the user's own answers and build their portfolio.
+
+    ``/run`` can only score personas from the fixed template list, so the guided
+    flow's answers previously had no path into the engine. This endpoint maps
+    them to a Persona, runs the same deterministic construction pipeline, and
+    returns the allocation together with the audit trail behind it.
+    """
+    persona, provenance, assets, abyid, scenarios, candidate = _build_persona_and_portfolio(req)
     baseline = equal_weight(persona, assets, abyid).weights
     metrics = evaluate_portfolio(candidate.weights, abyid, scenarios, persona, baseline=baseline)
 
@@ -166,5 +177,24 @@ def twin(req: TwinRequest):
                 "covariance": cov_meta,
             },
         },
+        "disclaimer": "Simulated results on a synthetic universe. Not investment advice.",
+    }
+
+
+@router.post("/forecast")
+def forecast(req: TwinRequest):
+    """Simulate a range of outcomes for the portfolio /twin would build.
+
+    Rebuilds the same persona and portfolio from the same answers and seed
+    (deterministic, so it matches what the Portfolio step showed), then
+    bootstraps the portfolio's own historical daily returns forward. The
+    response is a fan of quantiles over time, never a single projected line.
+    """
+    persona, _provenance, _assets, abyid, _scenarios, candidate = _build_persona_and_portfolio(req)
+    result = forecast_portfolio(candidate.weights, abyid, seed=req.seed)
+    return {
+        "method": candidate.method,
+        "forecast": result,
+        "portfolio_value": persona.financial_profile.portfolio_value,
         "disclaimer": "Simulated results on a synthetic universe. Not investment advice.",
     }

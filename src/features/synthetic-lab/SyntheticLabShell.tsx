@@ -5,9 +5,9 @@ import SyntheticLabStepper from './SyntheticLabStepper';
 import InlineDisclaimer from './components/InlineDisclaimer';
 import AdvancedSettingsDrawer from './components/AdvancedSettingsDrawer';
 import IntroductionStep from './steps/IntroductionStep';
-import PlaceholderStep from './steps/PlaceholderStep';
 import TwinStep from './steps/TwinStep';
 import PortfolioStep from './steps/PortfolioStep';
+import ForecastStep from './steps/ForecastStep';
 import FinancialProfileStep from './steps/FinancialProfileStep';
 import BehaviorQuizStep from './steps/BehaviorQuizStep';
 import DecisionScenariosStep from './steps/DecisionScenariosStep';
@@ -54,9 +54,7 @@ export default function SyntheticLabShell({ currentStep, maxReachedIndex, draftA
       case 'portfolio':
         return <PortfolioStep draft={draftApi.draft} onBack={goBack} onContinue={goNext} />;
       case 'forecast':
-        return <PlaceholderStep title="Future simulation" phase="Phase 6"
-          description="A range of possible outcomes for 3, 6 and 12 months — never a single guaranteed line."
-          onBack={goBack} />;
+        return <ForecastStep draft={draftApi.draft} onBack={goBack} />;
       default:
         return null;
     }
