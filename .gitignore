@@ -51,3 +51,4 @@ experiments_output/
 financial_twin_lab/_twins_output/
 *.twin.json
 public_portfolios/_cache/
+.vercel

@@ -10,6 +10,23 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          // Recharts + its d3-* internals have circular references between
+          // their own modules. Vite/Rollup's default per-module chunking can
+          // split those modules across separate chunks and load them out of
+          // evaluation order, producing "X is not a function" only in
+          // production builds (dev's unbundled ESM graph hides it). Keeping
+          // them in one chunk preserves their internal load order.
+          if (/node_modules\/(recharts|d3-[^/]+|victory-vendor)\//.test(id)) {
+            return 'charts-vendor';
+          }
+        },
+      },
+    },
+  },
   server: {
     // Behavioral Lab runs on isolated ports so it can run alongside the
     // upstream Capital Scope Terminal (5173 / 8000) without collision.
