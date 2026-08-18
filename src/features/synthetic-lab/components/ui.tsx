@@ -95,3 +95,41 @@ export function StepHeading({ title, description }: { title: string; description
     </header>
   );
 }
+
+/** A "$" + thousands-formatted number input. Reports plain numbers via onChange. */
+export function CurrencyInput({
+  value, onChange, placeholder = '0', min = 0, max, style,
+}: {
+  value: number | undefined; onChange: (n: number) => void;
+  placeholder?: string; min?: number; max?: number; style?: CSSProperties;
+}) {
+  const display = value === undefined || Number.isNaN(value) ? '' : value.toLocaleString('en-US');
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 8,
+      padding: `${space.md - 4}px ${space.md}px`, borderRadius: radius.md,
+      border: `1px solid ${color.borderSub}`, background: color.surface,
+      ...style,
+    }}>
+      <span style={{ fontSize: t.body + 2, fontWeight: 700, color: color.textLo }}>$</span>
+      <input
+        type="text"
+        inputMode="numeric"
+        value={display}
+        placeholder={placeholder}
+        onChange={(e) => {
+          const digits = e.target.value.replace(/[^\d]/g, '');
+          if (digits === '') { onChange(NaN); return; }
+          let n = Number(digits);
+          if (min !== undefined) n = Math.max(min, n);
+          if (max !== undefined) n = Math.min(max, n);
+          onChange(n);
+        }}
+        style={{
+          flex: 1, minWidth: 0, background: 'transparent', border: 'none', outline: 'none',
+          fontSize: t.body + 2, fontWeight: 700, color: color.textHi, fontVariantNumeric: 'tabular-nums',
+        }}
+      />
+    </div>
+  );
+}

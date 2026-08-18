@@ -19,6 +19,7 @@ const PAGE_META: Record<string, { title: string; crumb: string }> = {
   '/scanner':           { title: 'Gold Scanner', crumb: 'Discovery' },
   '/public-portfolios': { title: 'Public Books', crumb: 'Tracker' },
   '/synthetic-lab':     { title: 'Financial Twin Lab', crumb: 'Lab' },
+  '/thematic-lab':      { title: 'Thematic Lab', crumb: 'Focused Portfolio' },
   '/synthetic-portfolio-lab': { title: 'Synthetic Portfolio Lab', crumb: 'Lab' },
   '/terminal':          { title: 'Terminal',         crumb: 'Command Mode'},
 };

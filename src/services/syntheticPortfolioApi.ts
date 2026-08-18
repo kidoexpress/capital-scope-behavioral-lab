@@ -221,3 +221,63 @@ export async function fetchForecast(params: TwinParams): Promise<ForecastRespons
   }
   return res.json();
 }
+
+// ─────────────── Thematic Lab (independent of the persona-driven flow) ───────────────
+
+export interface ThemeSummary {
+  key: string;
+  label: string;
+  instrument_count: number;
+  symbols: string[];
+}
+
+export interface ThematicAllocationRow {
+  asset_id: string;
+  symbol: string;
+  name: string;
+  sector: string;
+  country: string;
+  weight: number;
+  risk_contribution: number;
+  amount: number;
+}
+
+export interface ThematicResponse {
+  theme: string;
+  theme_label: string;
+  budget: number;
+  instrument_count: number;
+  allocation: ThematicAllocationRow[];
+  risk: {
+    portfolio_volatility: number;
+    diversification_ratio: number;
+    covariance: { observations: number; shrinkage: number; average_correlation?: number; synthesized: string[] };
+  };
+  forecast: ForecastResponse['forecast'];
+  disclaimer: string;
+}
+
+async function asJson<T>(res: Response, fallbackMessage: string): Promise<T> {
+  if (!res.ok) {
+    let detail = fallbackMessage;
+    try {
+      const body = await res.json();
+      if (body?.detail) detail = String(body.detail);
+    } catch { /* keep the status-based message */ }
+    throw new Error(detail);
+  }
+  return res.json();
+}
+
+export async function fetchThemes(): Promise<{ themes: ThemeSummary[] }> {
+  return asJson(await fetch(`${BASE}/themes`), 'themes request failed');
+}
+
+export async function fetchThematicPortfolio(theme: string, budget: number, seed = 42): Promise<ThematicResponse> {
+  const res = await fetch(`${BASE}/thematic`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ theme, budget, seed }),
+  });
+  return asJson(res, 'thematic portfolio request failed');
+}

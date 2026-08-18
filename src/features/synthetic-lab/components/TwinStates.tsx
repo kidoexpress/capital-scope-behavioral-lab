@@ -19,7 +19,9 @@ export function EngineLoading({ label }: { label: string }) {
   );
 }
 
-export function EngineError({ message, onRetry }: { message: string; onRetry: () => void }) {
+export function EngineError({
+  message, onRetry, endpoint = '/api/synthetic-portfolio/twin',
+}: { message: string; onRetry: () => void; endpoint?: string }) {
   return (
     <div style={{
       padding: space.lg, borderRadius: radius.md,
@@ -34,7 +36,7 @@ export function EngineError({ message, onRetry }: { message: string; onRetry: ()
           </div>
           <div style={{ color: color.textMid, fontSize: t.support }}>{message}</div>
           <div style={{ color: color.textLo, fontSize: t.support, marginTop: 6 }}>
-            The backend serves this at <code>/api/synthetic-portfolio/twin</code>.
+            The backend serves this at <code>{endpoint}</code>.
           </div>
         </div>
       </div>

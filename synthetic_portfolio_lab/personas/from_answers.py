@@ -47,6 +47,30 @@ _DROP_RESPONSE = {"A": 0.0, "B": 0.35, "C": 0.65, "D": 1.0, "E": 0.45}
 _RALLY_RESPONSE = {"A": 1.0, "B": 0.65, "C": 0.2, "D": 0.3}
 
 
+DEFAULT_PORTFOLIO_VALUE = 100_000.0
+
+
+def _resolve_portfolio_value(profile: dict, prov: dict) -> float:
+    """The exact dollar amount the user typed in the Profile step's budget field.
+
+    Falls back to the retired capital-bracket midpoint for drafts saved before
+    that field existed, and finally to a flat default — always noting which
+    path was taken so the Twin step can disclose it rather than silently
+    presenting a guessed number as the user's own figure.
+    """
+    budget = profile.get("budget")
+    if isinstance(budget, (int, float)) and budget > 0:
+        return float(budget)
+
+    if "capital" in profile:
+        prov["notes"].append(
+            "no budget field in this draft; estimated portfolio value from the retired capital bracket")
+        return _CAPITAL_VALUE.get(str(profile["capital"]), DEFAULT_PORTFOLIO_VALUE)
+
+    prov["missing"].append("budget")
+    return DEFAULT_PORTFOLIO_VALUE
+
+
 def _clamp(x: float, lo: float = 0.0, hi: float = 1.0) -> float:
     return float(max(lo, min(hi, x)))
 
@@ -164,8 +188,10 @@ def persona_from_answers(
         prov["notes"].append(
             "income_stability is not collected by the flow; defaulted to 0.5")
 
+    portfolio_value = _resolve_portfolio_value(profile, prov)
+
     fin = FinancialProfile(
-        portfolio_value=_CAPITAL_VALUE.get(str(profile.get("capital", "250to1m")), 600_000.0),
+        portfolio_value=portfolio_value,
         income_stability=0.5,
         investment_horizon_years=horizon_years,
         liquidity_need=round(liquidity_need, 4),
@@ -217,6 +243,11 @@ def persona_from_answers(
                                     "liquidity_anxiety item", "loss aversion"],
             "maximum_equity_weight": ["risk tolerance"],
             "maximum_single_asset_weight": [f"experience='{experience}'"],
+            "portfolio_value": [
+                "budget field" if isinstance(profile.get("budget"), (int, float)) and profile.get("budget", 0) > 0
+                else "capital bracket (legacy)" if "capital" in profile
+                else "default (no budget answered)",
+            ],
         },
     })
     return persona, prov
