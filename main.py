@@ -11,6 +11,10 @@ URLs that aren't known ahead of time.
 
 import os
 
+from dotenv import load_dotenv
+
+load_dotenv()  # must run before any module below reads os.environ at import time
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
