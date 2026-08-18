@@ -7,15 +7,18 @@ interface CorrelationMatrixProps {
   prices?: Record<string, number[]>;
 }
 
+// Same soft, desaturated family as the app's --red/--amber/--green/--accent
+// design tokens (see index.css) instead of raw Tailwind rgba() values, so
+// this reads as part of the product rather than a generic chart palette.
 function getCorrelationColor(value: number): string {
-  if (value >= 0.8) return 'rgba(239,68,68,0.85)';
-  if (value >= 0.6) return 'rgba(249,115,22,0.75)';
-  if (value >= 0.4) return 'rgba(245,158,11,0.65)';
-  if (value >= 0.2) return 'rgba(16,185,129,0.45)';
-  if (value >= 0) return 'rgba(16,185,129,0.25)';
-  if (value >= -0.2) return 'rgba(59,130,246,0.25)';
-  if (value >= -0.4) return 'rgba(59,130,246,0.45)';
-  return 'rgba(99,102,241,0.65)';
+  if (value >= 0.8) return 'rgba(236,111,134,0.55)';   // --red   · very high
+  if (value >= 0.6) return 'rgba(236,111,134,0.32)';   // --red   · high
+  if (value >= 0.4) return 'rgba(215,169,85,0.40)';    // --amber · moderate
+  if (value >= 0.2) return 'rgba(85,217,154,0.30)';    // --green · low
+  if (value >= 0) return 'rgba(85,217,154,0.14)';      // --green · near zero
+  if (value >= -0.2) return 'rgba(138,164,255,0.18)';  // --accent · neutral-negative
+  if (value >= -0.4) return 'rgba(138,164,255,0.34)';  // --accent · negative
+  return 'rgba(168,150,255,0.5)';                       // --violet · very negative
 }
 
 function getCorrelationLabel(value: number): string {
@@ -44,6 +47,13 @@ function pearson(a: number[], b: number[]): number {
   const denom = Math.sqrt(da * db);
   return denom === 0 ? 0 : Math.max(-1, Math.min(1, num / denom));
 }
+
+const LEGEND = [
+  { label: '> 0.8 Very High', color: 'rgba(236,111,134,0.55)' },
+  { label: '0.4–0.8 Moderate', color: 'rgba(215,169,85,0.40)' },
+  { label: '0–0.4 Low', color: 'rgba(85,217,154,0.30)' },
+  { label: '< 0 Negative', color: 'rgba(138,164,255,0.34)' },
+];
 
 export default function CorrelationMatrix({ symbols, prices }: CorrelationMatrixProps) {
   const [matrix, setMatrix] = useState<number[][]>([]);
@@ -88,30 +98,49 @@ export default function CorrelationMatrix({ symbols, prices }: CorrelationMatrix
 
   if (loading) return <div className="shimmer h-64 rounded-xl" />;
   if (symbols.length < 2) return (
-    <div className="flex items-center justify-center h-32 text-xs" style={{ color: '#334155' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 128, fontSize: 12, color: 'var(--text-lo)' }}>
       Add at least 2 holdings to see correlations
     </div>
   );
 
-  const cellSize = Math.min(56, Math.floor(400 / symbols.length));
-  const fontSize = cellSize < 40 ? 8 : 10;
+  const cellSize = Math.min(52, Math.max(34, Math.floor(420 / symbols.length)));
+  const labelColWidth = 78;
+  const fontSize = cellSize < 40 ? 9.5 : 11;
 
   return (
-    <div className="overflow-auto">
-      <div className="inline-block min-w-full">
-        {/* Header row */}
-        <div className="flex" style={{ marginLeft: cellSize + 4 }}>
+    <div style={{ overflow: 'auto' }}>
+      <div style={{ display: 'inline-block', minWidth: '100%' }}>
+        {/* Header row — 45° diagonal labels read long tickers (e.g. TD-SELIC-2029)
+            far better than the previous fully-vertical writing-mode, which wrapped
+            onto 2-3 lines and became illegible. */}
+        <div style={{ display: 'flex', marginLeft: labelColWidth, height: 54, alignItems: 'flex-end' }}>
           {symbols.map(sym => (
-            <div key={sym} className="flex items-end justify-center font-mono text-[9px] font-semibold shrink-0" style={{ width: cellSize, height: 32, color: '#64748b', writingMode: 'vertical-rl', transform: 'rotate(180deg)', textAlign: 'center' }}>
-              {sym}
+            <div
+              key={sym}
+              style={{
+                width: cellSize, flexShrink: 0, position: 'relative', height: 54,
+              }}
+            >
+              <span style={{
+                position: 'absolute', bottom: 6, left: '50%',
+                transform: 'rotate(-40deg)', transformOrigin: 'left bottom',
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 10, fontWeight: 600,
+                color: 'var(--text-lo)', whiteSpace: 'nowrap',
+              }}>
+                {sym}
+              </span>
             </div>
           ))}
         </div>
 
         {/* Matrix rows */}
         {symbols.map((rowSym, i) => (
-          <div key={rowSym} className="flex items-center gap-1 mb-1">
-            <div className="font-mono font-semibold text-right shrink-0" style={{ width: cellSize, fontSize: fontSize, color: '#64748b' }}>
+          <div key={rowSym} style={{ display: 'flex', alignItems: 'center', gap: 3, marginBottom: 3 }}>
+            <div style={{
+              width: labelColWidth, flexShrink: 0, textAlign: 'right', paddingRight: 8,
+              fontFamily: 'JetBrains Mono, monospace', fontWeight: 600, fontSize: 11,
+              color: 'var(--text-lo)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            }} title={rowSym}>
               {rowSym}
             </div>
             {symbols.map((colSym, j) => {
@@ -121,21 +150,23 @@ export default function CorrelationMatrix({ symbols, prices }: CorrelationMatrix
               return (
                 <div
                   key={colSym}
-                  className="flex items-center justify-center rounded-md cursor-default transition-all duration-150 shrink-0"
                   style={{
-                    width: cellSize - 2,
-                    height: cellSize - 2,
-                    background: isDiag
-                      ? 'rgba(99,102,241,0.2)'
-                      : getCorrelationColor(val),
-                    border: isHovered ? '1px solid rgba(255,255,255,0.3)' : '1px solid transparent',
-                    transform: isHovered ? 'scale(1.05)' : 'scale(1)',
+                    width: cellSize - 3, height: cellSize - 3, flexShrink: 0,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    borderRadius: 6, cursor: 'default',
+                    background: getCorrelationColor(isDiag ? 1 : val),
+                    border: isHovered ? '1px solid var(--border-strong)' : '1px solid transparent',
+                    transform: isHovered ? 'scale(1.06)' : 'scale(1)',
+                    transition: 'transform 120ms ease, border-color 120ms ease',
                   }}
                   onMouseEnter={() => setHovered({ i, j })}
                   onMouseLeave={() => setHovered(null)}
                   title={isDiag ? `${rowSym} vs ${rowSym}: 1.00` : `${rowSym} vs ${colSym}: ${val.toFixed(2)} (${getCorrelationLabel(val)})`}
                 >
-                  <span className="font-mono font-bold" style={{ fontSize: fontSize, color: isDiag ? '#a5b4fc' : val > 0.5 ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.7)' }}>
+                  <span style={{
+                    fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, fontSize,
+                    color: isDiag || val >= 0.4 ? 'var(--text-hi)' : 'var(--text-mid)',
+                  }}>
                     {isDiag ? '1.0' : val.toFixed(2)}
                   </span>
                 </div>
@@ -145,17 +176,17 @@ export default function CorrelationMatrix({ symbols, prices }: CorrelationMatrix
         ))}
 
         {/* Legend */}
-        <div className="flex items-center gap-2 mt-3 flex-wrap">
-          <span className="text-[9px]" style={{ color: '#334155' }}>Correlation:</span>
-          {[
-            { label: '> 0.8 Very High', color: 'rgba(239,68,68,0.85)' },
-            { label: '0.4–0.8 Moderate', color: 'rgba(245,158,11,0.65)' },
-            { label: '0–0.4 Low', color: 'rgba(16,185,129,0.35)' },
-            { label: '< 0 Negative', color: 'rgba(59,130,246,0.45)' },
-          ].map(l => (
-            <div key={l.label} className="flex items-center gap-1">
-              <div className="w-3 h-3 rounded" style={{ background: l.color }} />
-              <span className="text-[9px] font-mono" style={{ color: '#475569' }}>{l.label}</span>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 16 }}>
+          {LEGEND.map(l => (
+            <div key={l.label} style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              padding: '4px 10px', borderRadius: 999,
+              background: 'var(--bg-surface)', border: '1px solid var(--border-dim)',
+            }}>
+              <span style={{ width: 8, height: 8, borderRadius: 3, background: l.color, flexShrink: 0 }} />
+              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10.5, color: 'var(--text-mid)' }}>
+                {l.label}
+              </span>
             </div>
           ))}
         </div>

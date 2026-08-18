@@ -63,20 +63,33 @@ export const STOCK_DATABASE: Record<string, Partial<StockQuote>> = {
   '9988.HK': { symbol: '9988.HK', name: 'Alibaba Group',        price: 82.0,   change: -1.2,  changePercent: -1.44, sector: 'Technology',  industry: 'E-commerce', beta: 1.28, marketCap: 205_000_000_000, peRatio: 14.2, eps: 5.77, dividendYield: 1.8, volume: 25_000_000, avgVolume: 30_000_000, high52w: 120.0, low52w: 60.0, previousClose: 83.2, open: 83.0, dayHigh: 83.5, dayLow: 81.0 },
 };
 
+// Kept in the same soft, desaturated family as the app's design tokens
+// (--accent, --green, --amber, --red, --violet in index.css) so this chart
+// reads as part of the product rather than a generic chart-library rainbow.
+// Every entry has its own distinct color — the previous version left
+// Industrials at the exact same hex as the "sector not found" fallback below,
+// so any unmapped sector (e.g. Open Finance's "Fixed Income") silently
+// rendered identically to Industrials with no way to tell them apart.
 export const SECTOR_COLORS: Record<string, string> = {
-  Technology: '#3b82f6',
-  'Communication Services': '#8b5cf6',
-  'Consumer Discretionary': '#f59e0b',
-  'Consumer Staples': '#10b981',
-  Financials: '#06b6d4',
-  Healthcare: '#ec4899',
-  Energy: '#f97316',
-  Utilities: '#84cc16',
-  'Real Estate': '#a78bfa',
-  Industrials: '#64748b',
-  Materials: '#78716c',
-  ETF: '#94a3b8',
+  Technology: '#8aa4ff',
+  'Communication Services': '#a896ff',
+  'Consumer Discretionary': '#e2915c',
+  'Consumer Staples': '#8ea677',
+  Financials: '#5ecfc4',
+  Healthcare: '#e08fc2',
+  Energy: '#d7a955',
+  Utilities: '#b8c95e',
+  'Real Estate': '#c9a2ff',
+  Industrials: '#7da7ff',
+  Materials: '#c48a5e',
+  ETF: '#6fb3d9',
+  'Fixed Income': '#55d99a',
+  Unknown: '#5b6577',
 };
+
+/** Fallback for a sector name with no explicit entry above — distinct from
+ * every mapped color (including Industrials) so it never silently collides. */
+export const SECTOR_FALLBACK_COLOR = '#ec6f86';
 
 export const POPULAR_TICKERS = [
   'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'NVDA', 'META', 'NFLX',
