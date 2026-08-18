@@ -1586,6 +1586,8 @@ select:focus {
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
+.spin { animation: spin 0.9s linear infinite; }
+
 .workflow-disclaimer {
   display: flex;
   align-items: center;
@@ -2299,6 +2301,95 @@ select:focus {
   border-radius: 20px;
   background: rgba(255,255,255,0.032);
   border: 1px solid rgba(255,255,255,0.052);
+}
+
+.of-connect-card {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(138,164,255,0.05);
+  border: 1px solid rgba(138,164,255,0.14);
+}
+
+.of-connect-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.of-connect-header h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-hi);
+  margin: 0;
+}
+
+.of-mode-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.of-mode-badge.mock {
+  color: #f0b429;
+  background: rgba(240,180,41,0.12);
+  border: 1px solid rgba(240,180,41,0.28);
+}
+
+.of-mode-badge.live {
+  color: #55d99a;
+  background: rgba(85,217,154,0.12);
+  border: 1px solid rgba(85,217,154,0.28);
+}
+
+.of-institution-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.of-institution-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  color: var(--text-hi);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.of-institution-btn:hover:not(:disabled) {
+  background: rgba(138,164,255,0.09);
+  border-color: rgba(138,164,255,0.25);
+}
+
+.of-institution-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.of-connect-footnote {
+  font-size: 11px;
+  color: var(--text-lo);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.of-connect-error {
+  font-size: 12px;
+  color: #ec6f86;
+  margin: 0;
 }
 
 .drawer-form-grid {

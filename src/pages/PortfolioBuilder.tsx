@@ -9,8 +9,10 @@ import { calcDiversificationScore, formatCurrency, formatPercent } from '../util
 import AllocationChart from '../components/charts/AllocationChart';
 import Disclaimer from '../components/ui/Disclaimer';
 import StockSearch from '../components/ui/StockSearch';
+import OpenFinanceConnect from '../components/portfolio/OpenFinanceConnect';
 import { SECTOR_COLORS } from '../data/mockStocks';
 import { DATA_SOURCE_LABEL } from '../services/marketDataService';
+import type { OpenFinanceHolding } from '../services/openFinanceApi';
 import type { PortfolioHolding } from '../types';
 
 interface AddHoldingForm {
@@ -165,6 +167,21 @@ export default function PortfolioBuilder() {
     });
     setForm({ symbol: '', shares: 10, avgCost: 100, weight: 0.1 });
     setAddLoading(false);
+  };
+
+  const handleOpenFinanceImport = (imported: OpenFinanceHolding[]) => {
+    for (const h of imported) {
+      addHolding({
+        symbol: h.symbol,
+        name: h.name,
+        weight: h.weight,
+        shares: h.shares,
+        avgCost: h.avgCost,
+        currentPrice: h.currentPrice,
+        sector: h.sector,
+      });
+    }
+    normalizeWeights();
   };
 
   return (
@@ -362,6 +379,8 @@ export default function PortfolioBuilder() {
               </div>
               <button onClick={() => setDrawerOpen(false)}><X size={18} /></button>
             </div>
+
+            <OpenFinanceConnect onImported={handleOpenFinanceImport} />
 
             <div className="drawer-add-card">
               <StockSearch

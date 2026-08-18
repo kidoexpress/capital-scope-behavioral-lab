@@ -24,6 +24,10 @@ served by the full app (main.py) on Railway, which has no such constraint.
 Full paper trading (persistent portfolios/trades) and the AI-agent proxies
 (/api/claude, /api/fmp, /api/finnhub — dev-only Vite proxies with no FastAPI
 equivalent yet) are also not available through this deployment.
+
+Open Finance (open_finance.api_routes) is included: it only needs httpx,
+already required above, and is stateless (mock-data fallback or a pure
+passthrough to Pluggy — see open_finance/__init__.py).
 """
 import os
 
@@ -32,6 +36,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from paper_trading.proxy import proxy_router
 from synthetic_portfolio_lab.api_routes import router as synthetic_portfolio_router
+from open_finance.api_routes import router as open_finance_router
 
 app = FastAPI(title="Capital Scope Behavioral Lab API (Vercel)")
 
@@ -54,6 +59,7 @@ app.add_middleware(
 
 app.include_router(proxy_router, prefix="/api")
 app.include_router(synthetic_portfolio_router, prefix="/api")
+app.include_router(open_finance_router, prefix="/api")
 
 
 @app.get("/health")

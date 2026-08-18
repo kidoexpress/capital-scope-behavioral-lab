@@ -18,6 +18,7 @@ from paper_trading.routes import router as paper_trading_router
 from paper_trading.proxy import proxy_router
 from synthetic_portfolio_lab.api_routes import router as synthetic_portfolio_router
 from public_portfolios.api_routes import router as public_portfolios_router
+from open_finance.api_routes import router as open_finance_router
 
 app = FastAPI(
     title="Capital Scope Behavioral Lab API",
@@ -50,6 +51,7 @@ app.include_router(paper_trading_router, prefix="/api")
 app.include_router(proxy_router, prefix="/api")
 app.include_router(synthetic_portfolio_router, prefix="/api")
 app.include_router(public_portfolios_router, prefix="/api")
+app.include_router(open_finance_router, prefix="/api")
 
 
 @app.get("/health")

@@ -12,6 +12,7 @@ COPY main.py .
 COPY paper_trading/ ./paper_trading/
 COPY synthetic_portfolio_lab/ ./synthetic_portfolio_lab/
 COPY public_portfolios/ ./public_portfolios/
+COPY open_finance/ ./open_finance/
 
 # Railway (and most container platforms) inject $PORT at runtime; the shell
 # form lets it expand. 8100 is only the local-dev fallback.
