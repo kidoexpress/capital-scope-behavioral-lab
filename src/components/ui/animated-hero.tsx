@@ -16,7 +16,7 @@ interface AnimatedHeroProps {
 
 export function AnimatedHero({
   prefix = "Research investments like",
-  titles = ["Goldman Sachs.", "a hedge fund.", "an institution.", "a quant.", "Wall Street."],
+  titles = ["a research desk.", "a hedge fund.", "an institution.", "a quant.", "Wall Street."],
   interval = 2400,
   onCta,
   ctaLabel = "Get started",

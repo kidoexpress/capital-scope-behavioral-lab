@@ -222,7 +222,7 @@ Please review the latest earnings results against this thesis and produce your a
 // ─── Market Research Agent ────────────────────────────────────────────────────
 
 const RESEARCH_SYSTEM_PROMPT = `You are a senior equity research analyst producing institutional research notes.
-Generate a professional research briefing that reads like it came from a Goldman Sachs or Morgan Stanley analyst desk.
+Generate a professional research briefing that reads like it came from a top-tier institutional research desk.
 
 For each company, structure your output as:
 **[TICKER] — [COMPANY NAME]**

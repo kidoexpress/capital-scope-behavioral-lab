@@ -21,7 +21,7 @@ const CONTAINER: React.CSSProperties = {
 /* ─── Animated rotating word (from animated-hero pattern) ─────── */
 function RotatingWord() {
   const words = useMemo(
-    () => ["Goldman Sachs.", "a hedge fund.", "an institution.", "a quant.", "Wall Street."],
+    () => ["a research desk.", "a hedge fund.", "an institution.", "a quant.", "Wall Street."],
     []
   );
   const [index, setIndex] = useState(0);
@@ -851,7 +851,7 @@ export default function Landing() {
               >
                 Research that reads
                 <br />
-                <span style={{ color: "rgba(255,255,255,0.34)" }}>like a Goldman report.</span>
+                <span style={{ color: "rgba(255,255,255,0.34)" }}>like a research desk's.</span>
               </h2>
               <p
                 style={{
