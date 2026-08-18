@@ -19,7 +19,7 @@ const GoldMiningScanner = lazy(() => import('./pages/GoldMiningScanner'));
 const PaperTrading = lazy(() => import('./pages/PaperTrading'));
 const SyntheticPortfolioLab = lazy(() => import('./pages/SyntheticPortfolioLab'));
 const SyntheticLab = lazy(() => import('./pages/SyntheticLab'));
-const ThematicLab = lazy(() => import('./pages/ThematicLab'));
+const Rebalance = lazy(() => import('./pages/Rebalance'));
 const PublicPortfolios = lazy(() => import('./pages/PublicPortfolios'));
 
 function RouteFallback() {
@@ -55,8 +55,8 @@ export default function App() {
           {/* New guided Financial Twin flow */}
           <Route path="synthetic-lab" element={page(<SyntheticLab />)} />
           <Route path="synthetic-lab/:step" element={page(<SyntheticLab />)} />
-          {/* Independent, non-guided sibling: a single concentrated theme instead of a full persona-driven build */}
-          <Route path="thematic-lab" element={page(<ThematicLab />)} />
+          {/* Compares real holdings (Portfolio) against the Financial Twin's target allocation */}
+          <Route path="rebalance" element={page(<Rebalance />)} />
           {/* Legacy single-page lab kept reachable until the new flow reaches parity */}
           <Route path="synthetic-portfolio-lab" element={page(<SyntheticPortfolioLab />)} />
           {/* AI Agents */}

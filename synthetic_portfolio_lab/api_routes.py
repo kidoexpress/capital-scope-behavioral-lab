@@ -28,7 +28,6 @@ from .forecasting.portfolio_forecast import forecast_portfolio
 from .personas.from_answers import persona_from_answers
 from .personas.templates import PERSONA_TEMPLATES, get_persona
 from .portfolios.construction import behavioral_scenario, equal_weight
-from .portfolios.thematic import build_thematic_portfolio, theme_catalog
 from .scenarios.templates import SCENARIO_TEMPLATES, all_scenarios, get_scenario
 from .scenarios.engine import normalize_probabilities
 
@@ -215,53 +214,4 @@ def forecast(req: TwinRequest):
         "forecast": result,
         "portfolio_value": persona.financial_profile.portfolio_value,
         "disclaimer": "Simulated results on a synthetic universe. Not investment advice.",
-    }
-
-
-# ─────────────────────── Thematic Lab ───────────────────────
-# Deliberately independent of the persona-driven flow above: no quiz, no
-# scenarios, just a theme and a budget. See portfolios/thematic.py.
-
-class ThematicRequest(BaseModel):
-    theme: str
-    budget: float
-    seed: int = 42
-    universe_seed: int = 12345
-    universe_days: int = 756
-
-
-@router.get("/themes")
-def themes(universe_seed: int = 12345, universe_days: int = 756):
-    """Available themes and how many universe instruments each currently has —
-    surfaced up front so a 1-instrument theme is never a surprise after the
-    user has already committed a budget to it."""
-    assets = build_universe(universe_seed, universe_days)
-    return {"themes": theme_catalog(assets)}
-
-
-@router.post("/thematic")
-def thematic(req: ThematicRequest):
-    if req.budget <= 0:
-        raise HTTPException(400, "budget must be positive")
-
-    assets = build_universe(req.universe_seed, req.universe_days)
-    abyid = universe_by_id(assets)
-
-    try:
-        result = build_thematic_portfolio(req.theme, req.budget, assets, abyid)
-    except ValueError as exc:
-        raise HTTPException(400, str(exc)) from exc
-
-    forecast = forecast_portfolio(result["weights_by_asset_id"], abyid, seed=req.seed)
-
-    return {
-        "theme": result["theme"],
-        "theme_label": result["theme_label"],
-        "budget": result["budget"],
-        "instrument_count": result["instrument_count"],
-        "allocation": result["allocation"],
-        "risk": result["risk"],
-        "forecast": forecast,
-        "disclaimer": "Simulated results on a synthetic universe. Not investment advice. "
-                       "A single-theme portfolio concentrates risk by design — it is not diversified.",
     }
