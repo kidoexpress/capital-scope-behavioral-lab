@@ -958,8 +958,8 @@ export default function Landing() {
               lineHeight: 1.65, marginBottom: 36,
             }}
           >
-            No Bloomberg subscription required. Just AI-powered tools built for the
-            way professionals actually research.
+            No six-figure terminal subscription required. Just AI-powered tools built
+            for the way professionals actually research.
           </p>
           <button
             onClick={goLaunch}
