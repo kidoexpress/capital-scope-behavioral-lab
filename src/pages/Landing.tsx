@@ -949,8 +949,8 @@ export default function Landing() {
               letterSpacing: "-0.04em", lineHeight: 1.06, marginBottom: 18,
             }}
           >
-            This is what serious fintech
-            <br />research looks like.
+            A hands-on way to learn
+            <br />investment research.
           </h2>
           <p
             style={{
@@ -958,8 +958,8 @@ export default function Landing() {
               lineHeight: 1.65, marginBottom: 36,
             }}
           >
-            No six-figure terminal subscription required. Just AI-powered tools built
-            for the way professionals actually research.
+            No paywall, no finance background required. A sandbox for practicing the
+            research workflows professionals use, at your own pace.
           </p>
           <button
             onClick={goLaunch}
